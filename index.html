@@ -1,0 +1,2234 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Daily DevOps Commands</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+:root{
+  --bg:#f3f5f8; --surface:#ffffff; --ink:#18202d; --muted:#5b6678; --faint:#8a94a6; --line:#dde2ea;
+  --accent:#0b6e79; --accent-soft:#e1f0f1; --code-bg:#f6f8fb; --warn:#a1470d; --warn-soft:#fbeee4;
+  --star:#b7791f; --set-bg:#e6f4ea; --set-ink:#1e6b34;
+  --sans:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#10151d; --surface:#171e29; --ink:#e4e9f1; --muted:#95a1b4; --faint:#6b778b; --line:#273142;
+    --accent:#4fc1cc; --accent-soft:#16333a; --code-bg:#121923; --warn:#f0a36b; --warn-soft:#3a2517;
+    --star:#e8b64c; --set-bg:#17331f; --set-ink:#8fdca6;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#10151d; --surface:#171e29; --ink:#e4e9f1; --muted:#95a1b4; --faint:#6b778b; --line:#273142;
+  --accent:#4fc1cc; --accent-soft:#16333a; --code-bg:#121923; --warn:#f0a36b; --warn-soft:#3a2517;
+  --star:#e8b64c; --set-bg:#17331f; --set-ink:#8fdca6;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:15px/1.5 var(--sans);padding-inline:16px;padding-block:0 56px}
+.wrap{max-width:1320px;margin:0 auto}
+button{font:inherit;color:inherit}
+header.top{padding-block:26px 10px;display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px}
+h1{font-size:clamp(24px,4vw,32px);font-weight:700;letter-spacing:-.01em;margin:0;text-wrap:balance}
+h1 .prompt{font-family:var(--mono);color:var(--accent);font-weight:600;margin-right:.35em}
+.sub{color:var(--muted);margin:4px 0 0;max-width:68ch}
+.stats{display:flex;gap:18px;font-family:var(--mono);font-size:12px;color:var(--muted)}
+.stats b{display:block;font-size:20px;color:var(--ink);font-weight:600;font-variant-numeric:tabular-nums}
+
+/* toolbar */
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:10;background:var(--bg);padding-block:12px 10px;border-bottom:1px solid var(--line);display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.search{position:relative;flex:1 1 320px}
+.search input{width:100%;font:15px var(--mono);padding:10px 14px 10px 38px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink)}
+.search input:focus,.vp input:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:transparent}
+.search svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:16px;height:16px;stroke:var(--muted);fill:none}
+.search kbd{position:absolute;right:10px;top:50%;transform:translateY(-50%);font:11px var(--mono);color:var(--muted);border:1px solid var(--line);border-radius:4px;padding:1px 6px}
+.tabs{display:flex;border:1px solid var(--line);border-radius:8px;background:var(--surface);padding:3px;gap:2px}
+.tab{border:0;background:none;padding:6px 12px;border-radius:6px;cursor:pointer;font-weight:500;font-size:14px;color:var(--muted);display:flex;gap:6px;align-items:center}
+.tab span{font:11px var(--mono);color:var(--faint)}
+.tab[aria-selected="true"]{background:var(--accent);color:var(--surface)}
+.tab[aria-selected="true"] span{color:inherit;opacity:.8}
+.vbtn{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:8px 12px;cursor:pointer;font-weight:500;font-size:14px;display:flex;gap:8px;align-items:center}
+.vbtn[aria-expanded="true"]{border-color:var(--accent);color:var(--accent)}
+.vbtn .n{font:11px var(--mono);background:var(--set-bg);color:var(--set-ink);border-radius:999px;padding:1px 7px}
+.vbtn svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* variables panel */
+.vp{margin-top:12px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px}
+.vp-head{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-bottom:10px}
+.vp-head p{margin:0;color:var(--muted);font-size:13px;max-width:70ch}
+.vp-head .actions{display:flex;gap:8px}
+.vp-head input{font:13px var(--mono);padding:6px 10px;border:1px solid var(--line);border-radius:6px;background:var(--code-bg);color:var(--ink);width:200px}
+.linkbtn{border:1px solid var(--line);background:none;border-radius:6px;padding:5px 10px;cursor:pointer;font-size:13px;color:var(--muted)}
+.linkbtn:hover{color:var(--warn);border-color:var(--warn)}
+.vgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px 12px;max-height:260px;overflow:auto;padding:2px}
+.vgrid label{display:flex;flex-direction:column;gap:3px;font:12px var(--mono);color:var(--accent)}
+.vgrid label small{color:var(--faint);font-family:var(--sans)}
+.vgrid input{font:13px var(--mono);padding:6px 8px;border:1px solid var(--line);border-radius:6px;background:var(--code-bg);color:var(--ink);width:100%}
+.vgrid input.has{border-color:var(--set-ink);background:var(--set-bg)}
+
+/* layout */
+.layout{display:grid;grid-template-columns:220px minmax(0,1fr);gap:28px;margin-top:18px}
+nav.side{position:sticky;top:calc(env(safe-area-inset-top,0px) + 76px);align-self:start;max-height:calc(100vh - 96px);overflow:auto;padding-right:4px;scrollbar-width:thin}
+.side h4{margin:14px 0 4px;font:600 10px var(--sans);text-transform:uppercase;letter-spacing:.09em;color:var(--faint)}
+.side button{display:flex;align-items:center;justify-content:space-between;width:100%;border:0;background:none;text-align:left;padding:4px 8px;border-radius:6px;cursor:pointer;font-size:14px;color:var(--ink)}
+.side button span{font:11px var(--mono);color:var(--faint)}
+.side button:hover{background:var(--surface)}
+.side button[aria-pressed="true"]{background:var(--accent-soft);color:var(--accent);font-weight:600}
+.side button.zero{opacity:.4}
+section.cat{margin-bottom:34px}
+.cat-head{display:flex;align-items:baseline;gap:10px;margin-bottom:8px;flex-wrap:wrap}
+.cat-head h2{margin:0;font-size:20px;font-weight:600}
+.tag{font:12px var(--mono);color:var(--accent);background:var(--accent-soft);padding:2px 8px;border-radius:4px}
+.cat-head p{margin:0;color:var(--muted);font-size:13px}
+.group{margin:16px 0 6px;font:600 11px var(--sans);text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.row{background:var(--surface);padding:10px 12px;display:flex;flex-direction:column;gap:4px;min-width:0;box-shadow:1px 0 0 var(--line),0 1px 0 var(--line)}
+.cmdline{display:flex;gap:6px;align-items:flex-start}
+code.cmd{flex:1;min-width:0;font:13px/1.45 var(--mono);background:var(--code-bg);border:1px solid var(--line);border-radius:6px;padding:6px 8px;overflow-x:auto;white-space:pre;color:var(--ink);scrollbar-width:thin}
+.ph{color:var(--accent);font-style:italic}
+select.alt{font:inherit;color:var(--accent);background:var(--accent-soft);border:1px dashed var(--accent);border-radius:4px;padding:0 2px;margin:0 1px;cursor:pointer;vertical-align:baseline}
+.ph.set{font-style:normal;color:var(--set-ink);background:var(--set-bg);border-radius:3px;padding:0 2px}
+.ib{flex:none;border:1px solid var(--line);background:var(--surface);color:var(--faint);border-radius:6px;width:30px;height:30px;display:grid;place-items:center;cursor:pointer}
+.ib:hover{color:var(--accent);border-color:var(--accent)}
+.ib svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2}
+.ib.star.on{color:var(--star);border-color:var(--star)}
+.ib.star.on svg{fill:currentColor}
+.ib.done{color:var(--surface);background:var(--accent);border-color:var(--accent)}
+.desc{font-size:13px;color:var(--muted);padding-left:2px}
+.danger{font:600 10px var(--sans);letter-spacing:.06em;text-transform:uppercase;color:var(--warn);background:var(--warn-soft);padding:1px 6px;border-radius:3px;margin-right:6px}
+mark{background:var(--accent-soft);color:inherit;border-radius:2px;box-shadow:0 0 0 1px var(--accent) inset}
+
+/* runbooks */
+.rb-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(480px,1fr));gap:16px}
+.rb{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;min-width:0}
+.rb h3{margin:0 0 2px;font-size:17px}
+.rb .meta{display:flex;gap:8px;align-items:center;margin-bottom:6px;flex-wrap:wrap}
+.rb .symptom{margin:0 0 12px;color:var(--muted);font-size:14px}
+.rb ol{margin:0;padding:0;list-style:none;counter-reset:s;display:flex;flex-direction:column;gap:10px}
+.rb li{counter-increment:s;display:grid;grid-template-columns:24px minmax(0,1fr);gap:8px}
+.rb li::before{content:counter(s);font:600 11px var(--mono);color:var(--accent);background:var(--accent-soft);border-radius:50%;width:22px;height:22px;display:grid;place-items:center;margin-top:3px}
+.rb li.note::before{content:"i";font-style:italic;color:var(--muted);background:var(--code-bg)}
+.rb li.note .desc{font-style:normal;color:var(--ink);background:var(--code-bg);border-radius:6px;padding:6px 8px}
+.rb .step{display:flex;flex-direction:column;gap:3px;min-width:0}
+
+.empty{margin:48px 0;text-align:center;color:var(--muted)}
+.legend{margin-top:28px;font-size:12px;color:var(--muted);display:flex;gap:18px;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:14px}
+.legend code{font-family:var(--mono);color:var(--accent);font-style:italic}
+.hint{font-size:13px;color:var(--muted);margin:0 0 14px}
+
+@media (max-width:900px){
+  .layout{grid-template-columns:1fr;gap:10px}
+  nav.side{position:static;max-height:none;display:flex;gap:6px;overflow-x:auto;padding-bottom:6px}
+  .side h4{display:none}
+  .side button{flex:none;width:auto;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:5px 12px;gap:6px}
+  .rb-grid{grid-template-columns:1fr}
+}
+@media (max-width:480px){.grid{grid-template-columns:1fr}.search kbd{display:none}.stats{display:none}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div>
+      <h1><span class="prompt">$</span>Daily DevOps Commands</h1>
+      <p class="sub">Everyday commands for infrastructure, platforms, data and MLOps. Set your own values once and every command is ready to copy.</p>
+    </div>
+    <div class="stats" id="stats"></div>
+  </header>
+
+  <div class="bar">
+    <label class="search" for="q">
+      <svg viewBox="0 0 24 24" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input id="q" type="search" placeholder="Search — e.g. logs rollback, disk full, lag, gpu" autocomplete="off" spellcheck="false">
+      <kbd>/</kbd>
+    </label>
+    <div class="tabs" role="tablist" id="tabs">
+      <button class="tab" role="tab" data-view="commands" id="tab-commands">Commands <span id="n-commands"></span></button>
+      <button class="tab" role="tab" data-view="runbooks" id="tab-runbooks">Runbooks <span id="n-runbooks"></span></button>
+      <button class="tab" role="tab" data-view="starred" id="tab-starred">Starred <span id="n-starred"></span></button>
+    </div>
+    <button class="vbtn" id="vbtn" aria-expanded="false" aria-controls="vp" type="button">
+      <svg viewBox="0 0 24 24"><path d="M4 7h10M4 17h6M18 7h2M14 17h6"/><circle cx="16" cy="7" r="2"/><circle cx="12" cy="17" r="2"/></svg>
+      My values <span class="n" id="vcount" hidden></span>
+    </button>
+  </div>
+
+  <div class="vp" id="vp" hidden>
+    <div class="vp-head">
+      <p>Fill in the values you use, like namespace, host or bucket. They replace the placeholders in every command and go into what you copy. They're saved in this browser only.</p>
+      <div class="actions">
+        <input id="vfilter" type="search" placeholder="Find a placeholder" aria-label="Find a placeholder">
+        <button class="linkbtn" id="vclear" type="button">Clear all</button>
+      </div>
+    </div>
+    <div class="vgrid" id="vgrid"></div>
+  </div>
+
+  <div class="layout">
+    <nav class="side" id="side" aria-label="Tools"></nav>
+    <main id="out"></main>
+  </div>
+
+  <div class="legend">
+    <span><code>&lt;placeholder&gt;</code> fill in, or set it once under “My values”</span>
+    <span><span class="danger">Destructive</span> deletes or changes resources — double-check first</span>
+    <span><select class="alt" tabindex="-1" aria-hidden="true"><option>restart</option></select> pick an option — the copy uses your choice</span>
+    <span><b>/</b> focus search · <b>Esc</b> clear</span>
+  </div>
+</div>
+
+<script>
+const CATS = [], RUNBOOKS = [];
+function C(id,name,tag,sec,blurb,groups){ CATS.push({id,name,tag,sec,blurb,groups}); }
+function R(id,title,area,symptom,steps){ RUNBOOKS.push({id,title,area,symptom,steps}); }
+const _ins = {};
+function A(catId,name,rows){ const c = CATS.find(x=>x.id===catId); if(!c) return; const i = _ins[catId]||0; c.groups.splice(i,0,[name,rows]); _ins[catId]=i+1; }
+C("linux","Linux","bash","Core","Health checks, processes, services, users, scheduling.",[
+ ["System health",[
+  ["uptime","Load averages for 1, 5 and 15 minutes"],
+  ["free -h","Memory and swap usage, human-readable"],
+  ["df -hT","Disk usage per filesystem with type"],
+  ["df -i","Inode usage (disk can be 'full' with free space)"],
+  ["du -xh --max-depth=1 <dir> | sort -h","Size of each subdirectory, one filesystem only"],
+  ["top -o %MEM","Live processes sorted by memory (htop if installed)"],
+  ["vmstat 1 5","CPU, memory, swap and IO every second, 5 times"],
+  ["iostat -xz 1","Per-disk IO utilisation and latency (sysstat)"],
+  ["mpstat -P ALL 1","Per-CPU utilisation (sysstat)"],
+  ["sar -u -r 1 5","CPU and memory samples (sysstat)"],
+  ["dmesg -T | tail -50","Recent kernel messages with timestamps"],
+  ["dmesg -T | grep -i -E 'oom|killed process'","Check for out-of-memory kills"],
+  ["cat /etc/os-release && uname -r","OS release and kernel version"],
+  ["lscpu && nproc","CPU model, cores and threads"],
+  ["lsblk -f","Block devices, filesystems and mount points"],
+  ["timedatectl","Time, timezone and NTP sync status"]]],
+ ["Processes",[
+  ["ps aux --sort=-%cpu | head","Top CPU-consuming processes"],
+  ["ps aux --sort=-%mem | head","Top memory-consuming processes"],
+  ["ps -ef --forest","Process tree"],
+  ["pgrep -a <name>","Find processes by name with arguments"],
+  ["lsof -p <pid>","Files and sockets opened by a process"],
+  ["lsof +L1","Deleted files still held open (hidden disk usage)"],
+  ["kill -15 <pid>","Ask a process to terminate gracefully"],
+  ["!kill -9 <pid>","Force-kill a process (no cleanup)"],
+  ["strace -p <pid> -f -e trace=network","Trace a process's network syscalls"],
+  ["nice -n 10 <command> && renice +10 -p <pid>","Run / change process at lower priority"],
+  ["nohup <command> > out.log 2>&1 &","Run a command that survives logout"]]],
+ ["systemd services",[
+  ["systemctl status <service>","State and recent log lines of a service"],
+  ["sudo systemctl restart <service>","Restart a service"],
+  ["sudo systemctl enable --now <service>","Start now and at boot"],
+  ["systemctl list-units --type=service --state=running","Running services"],
+  ["systemctl list-units --failed","Units that failed"],
+  ["systemctl list-timers","Scheduled systemd timers"],
+  ["sudo systemctl daemon-reload","Reload unit files after editing"],
+  ["systemctl cat <service>","Show the unit file and overrides"],
+  ["sudo systemctl edit <service>","Create an override (drop-in) for a unit"],
+  ["systemd-analyze blame | head","Slowest units at boot"]]],
+ ["Logs",[
+  ["journalctl -u <service> -f","Follow a service's logs"],
+  ["journalctl -u <service> --since '1 hour ago'","Service logs from the last hour"],
+  ["journalctl -p err -b","Errors since last boot"],
+  ["journalctl --disk-usage && sudo journalctl --vacuum-time=7d","Journal size, keep only 7 days"],
+  ["tail -f /var/log/syslog","Follow the system log (messages on RHEL)"],
+  ["grep -Rin \"<text>\" /var/log/","Search all logs for a string"],
+  ["last -n 20 && lastb -n 20","Recent logins and failed logins"]]],
+ ["Users & permissions",[
+  ["id <user> && groups <user>","User's UID, GID and groups"],
+  ["sudo useradd -m -s /bin/bash <user>","Create a user with home directory"],
+  ["sudo usermod -aG <group> <user>","Add a user to a group"],
+  ["sudo passwd -l <user>","Lock a user's password"],
+  ["sudo -l","What you are allowed to run with sudo"],
+  ["chmod 600 <file> && chown <user>:<group> <file>","Tighten permissions and set owner"],
+  ["find <dir> -perm -o+w -type f","World-writable files"],
+  ["getfacl <file>","Show ACLs on a file"],
+  ["getenforce && sestatus","SELinux mode (RHEL family)"]]],
+ ["Scheduling",[
+  ["crontab -l","Your cron jobs"],
+  ["crontab -e","Edit your cron jobs"],
+  ["sudo ls /etc/cron.d /etc/cron.daily","System cron jobs"],
+  ["grep CRON /var/log/syslog | tail","Recent cron runs (cron log on RHEL)"]]],
+ ["Packages",[
+  ["sudo apt update && apt list --upgradable","Debian/Ubuntu: pending upgrades"],
+  ["sudo apt install -y <package>","Debian/Ubuntu: install"],
+  ["sudo dnf check-update && sudo dnf upgrade -y","RHEL/Fedora: check and upgrade"],
+  ["rpm -qa | grep <name>","RHEL: is a package installed"],
+  ["dpkg -l | grep <name>","Debian: is a package installed"],
+  ["needs-restarting -r || ls /var/run/reboot-required","Is a reboot required after updates"]]],
+ ["Files & archives",[
+  ["find / -xdev -type f -size +500M 2>/dev/null","Files larger than 500 MB"],
+  ["find <dir> -type f -mtime +30 -name '*.log'","Log files older than 30 days"],
+  ["!find <dir> -type f -mtime +30 -name '*.log' -delete","Delete log files older than 30 days"],
+  ["tar -czf <archive>.tar.gz <dir>","Create a gzipped archive"],
+  ["tar -xzf <archive>.tar.gz -C <dest>","Extract an archive"],
+  ["tar -tzf <archive>.tar.gz | head","List archive contents"],
+  ["sha256sum <file>","File checksum"],
+  ["truncate -s 0 <logfile>","Empty a log without breaking open handles"],
+  ["ln -sfn <target> <link>","Create or update a symlink"],
+  ["stat <file>","Size, permissions and timestamps"]]],
+ ["Remote",[
+  ["ssh -i <key.pem> <user>@<host>","SSH with a specific key"],
+  ["ssh -J <bastion> <user>@<host>","SSH through a jump host"],
+  ["ssh -L 8080:<internal-host>:<port> <user>@<bastion>","Local port forward through a bastion"],
+  ["ssh-keygen -t ed25519 -C \"<email>\"","Generate an SSH key"],
+  ["ssh-copy-id <user>@<host>","Install your public key on a host"],
+  ["scp <file> <user>@<host>:<dest>","Copy a file to a host"],
+  ["rsync -avz --progress <src>/ <user>@<host>:<dest>/","Sync a directory to a remote host"],
+  ["tmux new -A -s <name>","Persistent terminal session: attach, or create if missing"]]]
+]);
+
+C("net","Networking","net","Core","Connectivity, DNS, ports, packets, firewalls.",[
+ ["Interfaces & routes",[
+  ["ip -br a","Interfaces and IP addresses, brief"],
+  ["ip route","Routing table"],
+  ["ip route get <ip>","Which route/interface reaches an IP"],
+  ["ip -s link","Interface counters (errors, drops)"],
+  ["ethtool <iface>","Link speed and duplex"],
+  ["cat /etc/resolv.conf","DNS resolvers in use"],
+  ["nmcli dev status","NetworkManager device status"]]],
+ ["Ports & connections",[
+  ["ss -tulpn","Listening ports and owning processes"],
+  ["ss -tan state established | wc -l","Count established TCP connections"],
+  ["ss -tan | awk 'NR>1{print $1}' | sort | uniq -c","Connections by TCP state"],
+  ["ss -tnp dst <ip>","Connections to a specific host"],
+  ["lsof -i :<port>","Which process uses a port"],
+  ["nc -zv <host> <port>","Test whether a TCP port is reachable"],
+  ["timeout 3 bash -c '</dev/tcp/<host>/<port>' && echo open","Port test without nc"],
+  ["nmap -Pn -p <port> <host>","Port state from outside"]]],
+ ["DNS",[
+  ["dig +short <domain>","Resolve a name"],
+  ["dig <domain> @<dns-server>","Query a specific DNS server"],
+  ["dig +trace <domain>","Follow delegation from the root"],
+  ["dig -x <ip> +short","Reverse lookup"],
+  ["dig <domain> MX +short","Mail records (also TXT, NS, CNAME)"],
+  ["resolvectl status","systemd-resolved per-link DNS"],
+  ["getent hosts <name>","Resolve like applications do (incl. /etc/hosts)"]]],
+ ["HTTP",[
+  ["curl -I https://<host>","Response headers only"],
+  ["curl -sw '%{http_code} %{time_total}s\\n' -o /dev/null <url>","Status code and total time"],
+  ["curl -sw 'dns:%{time_namelookup} connect:%{time_connect} tls:%{time_appconnect} ttfb:%{time_starttransfer} total:%{time_total}\\n' -o /dev/null <url>","Timing breakdown of a request"],
+  ["curl -v --resolve <host>:443:<ip> https://<host>/","Hit a specific backend IP with the right Host/SNI"],
+  ["curl -X POST -H 'Content-Type: application/json' -d '{\"key\":\"value\"}' <url>","POST JSON"],
+  ["curl -L -o <file> <url>","Download following redirects"],
+  ["wget -qO- <url>","Print a URL's body"],
+  ["for i in $(seq 1 20); do curl -so /dev/null -w '%{http_code}\\n' <url>; done | sort | uniq -c","Quick repeated check of status codes"]]],
+ ["Path & packets",[
+  ["ping -c 4 <host>","Basic reachability and latency"],
+  ["mtr -rwc 50 <host>","Per-hop loss and latency report"],
+  ["traceroute -T -p 443 <host>","TCP traceroute to port 443"],
+  ["tracepath <host>","Path and MTU discovery"],
+  ["sudo tcpdump -i any -nn port <port>","Capture traffic on a port"],
+  ["sudo tcpdump -i any -nn host <ip> -w capture.pcap","Save a capture for Wireshark"],
+  ["iperf3 -c <server>","Bandwidth test (run iperf3 -s on the server first)"]]],
+ ["Firewall",[
+  ["sudo iptables -L -n -v --line-numbers","iptables rules with counters"],
+  ["sudo nft list ruleset","nftables rules"],
+  ["sudo ufw status verbose","Ubuntu UFW status"],
+  ["sudo firewall-cmd --list-all","firewalld zone config (RHEL)"],
+  ["sudo firewall-cmd --add-port=<port>/tcp --permanent && sudo firewall-cmd --reload","Open a port with firewalld"]]]
+]);
+
+C("tls","TLS & certificates","openssl","Core","Inspect, test and create certificates.",[
+ ["Inspect",[
+  ["echo | openssl s_client -connect <host>:443 -servername <host> 2>/dev/null | openssl x509 -noout -subject -issuer -dates","Live cert subject, issuer and expiry"],
+  ["echo | openssl s_client -connect <host>:443 -servername <host> -showcerts","Full chain sent by the server"],
+  ["openssl x509 -in <cert.pem> -noout -text","Decode a certificate file"],
+  ["openssl x509 -in <cert.pem> -noout -ext subjectAltName","SANs on a certificate"],
+  ["openssl x509 -in <cert.pem> -noout -checkend 2592000","Exit 1 if it expires within 30 days"],
+  ["openssl req -in <file.csr> -noout -text","Decode a CSR"],
+  ["openssl verify -CAfile <ca.pem> <cert.pem>","Verify a cert against a CA"],
+  ["kubectl get secret <tls-secret> -n <ns> -o jsonpath='{.data.tls\\.crt}' | base64 -d | openssl x509 -noout -dates","Expiry of a cert stored in a Kubernetes secret"]]],
+ ["Create & convert",[
+  ["openssl req -new -newkey rsa:2048 -nodes -keyout <name>.key -out <name>.csr -subj \"/CN=<host>\"","New key and CSR"],
+  ["openssl req -x509 -newkey rsa:2048 -nodes -days 365 -keyout <name>.key -out <name>.crt -subj \"/CN=<host>\" -addext \"subjectAltName=DNS:<host>\"","Self-signed cert with SAN"],
+  ["openssl pkcs12 -export -out <name>.pfx -inkey <name>.key -in <name>.crt -certfile <ca.pem>","PEM → PFX/P12"],
+  ["openssl pkcs12 -in <name>.pfx -nodes -out <name>.pem","PFX/P12 → PEM"],
+  ["openssl x509 -in <cert.der> -inform der -out <cert.pem>","DER → PEM"],
+  ["diff <(openssl x509 -in <cert.pem> -noout -modulus) <(openssl rsa -in <name>.key -noout -modulus) && echo match","Does this key match this cert (RSA)"],
+  ["keytool -list -v -keystore <store.jks>","List a Java keystore"],
+  ["sudo update-ca-certificates","Trust CAs in /usr/local/share/ca-certificates (Debian)"],
+  ["sudo update-ca-trust","Trust CAs in /etc/pki/ca-trust/source/anchors (RHEL)"]]]
+]);
+
+C("text","Text & JSON","jq","Core","jq, yq, grep, awk, sed, xargs one-liners.",[
+ ["jq",[
+  ["jq . <file.json>","Pretty-print JSON"],
+  ["jq -r '.items[].metadata.name'","Extract a field from each item"],
+  ["jq '.items[] | select(.status.phase != \"Running\") | .metadata.name'","Filter by a condition"],
+  ["jq -r '.[] | [.name, .version] | @tsv'","Output as tab-separated columns"],
+  ["jq 'length'","Count items"],
+  ["jq -c '.[]'","One compact JSON object per line"],
+  ["jq --arg v <value> '.key = $v' <file.json>","Set a value from a shell argument"],
+  ["jq -s 'add' <a.json> <b.json>","Merge JSON arrays from files"]]],
+ ["yq (YAML)",[
+  ["yq '.spec.template.spec.containers[0].image' <file.yaml>","Read a value"],
+  ["yq -i '.spec.replicas = 3' <file.yaml>","Edit a value in place"],
+  ["yq -o=json <file.yaml>","YAML → JSON"],
+  ["yq 'select(.kind == \"Deployment\")' <multi.yaml>","Pick documents from a multi-doc file"]]],
+ ["grep / awk / sed",[
+  ["grep -rn --include='*.yaml' \"<text>\" <dir>","Search recursively in YAML files"],
+  ["grep -v -E '^\\s*(#|$)' <file>","Show a config without comments/blank lines"],
+  ["grep -c \" 500 \" <access.log>","Count lines matching"],
+  ["awk '{print $1}' <access.log> | sort | uniq -c | sort -rn | head","Top client IPs in an access log"],
+  ["awk -F, '{sum+=$3} END {print sum}' <file.csv>","Sum a CSV column"],
+  ["sed -i 's/<old>/<new>/g' <file>","Replace text in place"],
+  ["sed -n '100,200p' <file>","Print a line range"],
+  ["column -t -s, <file.csv> | less -S","View CSV as aligned table"],
+  ["sort <file> | uniq -c | sort -rn | head","Most frequent lines"],
+  ["cut -d: -f1 /etc/passwd","Extract a field by delimiter"]]],
+ ["Pipes & helpers",[
+  ["<command> | xargs -r -n1 -P4 <other-command>","Run a command per input line, 4 in parallel"],
+  ["watch -n 2 '<command>'","Re-run a command every 2 seconds"],
+  ["<command> | tee <file>","Show output and save to a file"],
+  ["echo -n '<text>' | base64 && echo '<b64>' | base64 -d","Base64 encode / decode"],
+  ["openssl rand -base64 32","Random secret / password"],
+  ["uuidgen","Generate a UUID"],
+  ["date -u +%Y-%m-%dT%H:%M:%SZ && date -d @<epoch>","ISO timestamp and epoch conversion"],
+  ["diff -u <file1> <file2>","Unified diff of two files"],
+  ["envsubst < <template> > <output>","Fill ${VARS} in a template from the environment"]]]
+]);
+
+C("git","Git","git","Core","Branches, syncing, history, fixing mistakes.",[
+ ["Everyday",[
+  ["git status -sb","Short status with branch info"],
+  ["git pull --rebase","Update without a merge commit"],
+  ["git switch -c <branch>","Create and switch to a branch"],
+  ["git switch <branch>","Switch branch"],
+  ["git add -p","Stage changes hunk by hunk"],
+  ["git commit -m \"<message>\"","Commit staged changes"],
+  ["git push -u origin <branch>","Push and set upstream"],
+  ["git fetch --all --prune","Fetch everything, drop deleted remote branches"],
+  ["git clone --depth 1 <url>","Shallow clone (latest commit only)"]]],
+ ["Inspect",[
+  ["git log --oneline --graph --decorate -20","Recent history as a graph"],
+  ["git log --since='1 week ago' --author=\"<name>\" --oneline","Someone's commits this week"],
+  ["git diff --staged","What is about to be committed"],
+  ["git diff <branch1>...<branch2> --stat","Files changed between branches"],
+  ["git show <sha> --stat","Files changed in a commit"],
+  ["git blame -L <start>,<end> <file>","Who changed these lines"],
+  ["git log -S \"<text>\" --oneline","Commits that added or removed a string"],
+  ["git log --follow -p -- <file>","Full history of a file, across renames"],
+  ["git shortlog -sn --since='1 month ago'","Commit counts per author"]]],
+ ["Branches & merging",[
+  ["git branch -vv","Local branches with upstream and last commit"],
+  ["git branch -r --merged origin/main","Remote branches already merged"],
+  ["git rebase origin/main","Replay your branch on latest main"],
+  ["git merge --no-ff <branch>","Merge keeping a merge commit"],
+  ["git cherry-pick <sha>","Apply one commit onto current branch"],
+  ["git rebase --abort","Bail out of a conflicted rebase (git merge --abort for merges)"],
+  ["git bisect start && git bisect bad && git bisect good <sha>","Binary-search for a breaking commit"],
+  ["git worktree add ../<dir> <branch>","Check out a second branch in another folder"]]],
+ ["Fix mistakes",[
+  ["git commit --amend --no-edit","Add staged changes to the last commit"],
+  ["git restore <file>","Discard local changes to a file"],
+  ["git restore --staged <file>","Unstage a file"],
+  ["git reset --soft HEAD~1","Undo last commit, keep changes staged"],
+  ["git revert <sha>","Commit that undoes <sha> (safe on shared branches)"],
+  ["git stash push -m \"<note>\" && git stash list","Park work in progress"],
+  ["git stash pop","Bring stashed work back"],
+  ["git reflog -20","Find 'lost' commits after a reset"],
+  ["git push --force-with-lease","Force-push only if nobody else pushed"],
+  ["!git reset --hard origin/<branch>","Throw away local commits and changes"],
+  ["!git clean -fdx","Delete all untracked and ignored files"]]],
+ ["Tags, cleanup & config",[
+  ["git tag -a v<x.y.z> -m \"<notes>\" && git push origin v<x.y.z>","Create and push an annotated release tag"],
+  ["git describe --tags --abbrev=0","Latest tag"],
+  ["git fetch -p && git branch -vv | grep ': gone]' | awk '{print $1}' | xargs -r git branch -D","Delete local branches whose remote is gone"],
+  ["git config --global user.name \"<name>\" && git config --global user.email \"<email>\"","Set identity"],
+  ["git config --global pull.rebase true","Always rebase on pull"],
+  ["git remote -v && git remote set-url origin <url>","Show / change remote URL"],
+  ["git lfs track '*.bin' && git lfs ls-files","Track large files with Git LFS"],
+  ["git gc --prune=now && git count-objects -vH","Compact repo and show its size"]]]
+]);
+
+C("gh","GitHub CLI","gh","CI/CD","Pull requests, Actions runs, releases.",[
+ ["Pull requests",[
+  ["gh auth login && gh auth status","Log in and check auth"],
+  ["gh pr list --author @me","Your open PRs"],
+  ["gh pr create --fill --base main","Open a PR from the current branch"],
+  ["gh pr checkout <number>","Check out a PR locally"],
+  ["gh pr checks <number> --watch","Watch CI checks on a PR"],
+  ["gh pr view <number> --web","Open a PR in the browser"],
+  ["gh pr merge <number> --squash --delete-branch","Squash-merge and delete branch"]]],
+ ["Actions",[
+  ["gh run list --limit 10","Recent workflow runs"],
+  ["gh run watch","Watch the latest run live"],
+  ["gh run view <run-id> --log-failed","Logs of failed steps only"],
+  ["gh run rerun <run-id> --failed","Re-run failed jobs"],
+  ["gh workflow run <workflow.yml> -f <input>=<value>","Trigger a workflow_dispatch"],
+  ["gh secret set <NAME> < <file>","Set a repo secret from a file"]]],
+ ["Releases & repos",[
+  ["gh release create v<x.y.z> --generate-notes","Create a release with auto notes"],
+  ["gh release download v<x.y.z> -p '*.tar.gz'","Download release assets"],
+  ["gh repo clone <owner>/<repo>","Clone a repo"],
+  ["gh api repos/<owner>/<repo>/actions/runs --jq '.workflow_runs[0].status'","Call the REST API with jq filtering"]]]
+]);
+
+C("gitlab","GitLab CI","glab","CI/CD","Pipelines, merge requests and runners.",[
+ ["glab CLI",[
+  ["glab auth login --hostname <gitlab-host>","Log in to self-managed GitLab"],
+  ["glab mr list --assignee=@me","Merge requests assigned to you"],
+  ["glab mr create --fill --target-branch main","Open an MR from current branch"],
+  ["glab ci status","Pipeline status for current branch"],
+  ["glab ci view","Interactive pipeline view"],
+  ["glab ci trace <job-id>","Stream a job's log"],
+  ["glab ci retry <job-id>","Retry a job"],
+  ["glab ci lint","Validate .gitlab-ci.yml"]]],
+ ["API & runners",[
+  ["curl -s --header \"PRIVATE-TOKEN: $GITLAB_TOKEN\" \"https://<gitlab-host>/api/v4/projects/<id>/pipelines?per_page=5\" | jq","Latest pipelines via API"],
+  ["curl -X POST -F token=<trigger-token> -F ref=main https://<gitlab-host>/api/v4/projects/<id>/trigger/pipeline","Trigger a pipeline"],
+  ["sudo gitlab-runner status && sudo gitlab-runner list","Runner service and registered runners"],
+  ["sudo gitlab-runner verify","Check runners can reach GitLab"],
+  ["sudo gitlab-runner restart","Restart the runner service"],
+  ["sudo journalctl -u gitlab-runner -f","Follow runner logs"]]]
+]);
+
+C("jenkins","Jenkins","jenkins","CI/CD","Build, inspect and maintain Jenkins.",[
+ ["Jobs via CLI / API",[
+  ["export JENKINS_URL=https://<jenkins-host> JAUTH=<user>:<api-token>","Set once per shell"],
+  ["java -jar jenkins-cli.jar -s $JENKINS_URL -auth $JAUTH list-jobs","List jobs"],
+  ["java -jar jenkins-cli.jar -s $JENKINS_URL -auth $JAUTH build <job> -f -v -p <PARAM>=<value>","Build with parameters and follow output"],
+  ["java -jar jenkins-cli.jar -s $JENKINS_URL -auth $JAUTH console <job>","Console of the last build"],
+  ["curl -s -u $JAUTH $JENKINS_URL/job/<job>/lastBuild/api/json | jq '{result, duration, building}'","Result of the last build"],
+  ["curl -X POST -u $JAUTH \"$JENKINS_URL/job/<job>/buildWithParameters?<PARAM>=<value>\"","Trigger a parameterised build via API"],
+  ["curl -s -u $JAUTH $JENKINS_URL/queue/api/json | jq '.items[].task.name'","What is waiting in the queue"],
+  ["curl -X POST -u $JAUTH $JENKINS_URL/pipeline-model-converter/validate -F \"jenkinsfile=<Jenkinsfile\"","Validate a declarative Jenkinsfile"]]],
+ ["Maintenance",[
+  ["java -jar jenkins-cli.jar -s $JENKINS_URL -auth $JAUTH safe-restart","Restart after running builds finish"],
+  ["java -jar jenkins-cli.jar -s $JENKINS_URL -auth $JAUTH quiet-down","Stop starting new builds"],
+  ["java -jar jenkins-cli.jar -s $JENKINS_URL -auth $JAUTH list-plugins | grep -e ')$'","Plugins with updates available"],
+  ["du -sh $JENKINS_HOME/jobs/* | sort -h | tail","Largest job directories"],
+  ["kubectl logs -f deploy/jenkins -n <ns>","Controller logs on Kubernetes"]]]
+]);
+
+C("docker","Docker","docker","Containers","Containers, images, compose, networks, cleanup.",[
+ ["Containers",[
+  ["docker ps -a --format 'table {{.Names}}\\t{{.Status}}\\t{{.Image}}\\t{{.Ports}}'","All containers, compact table"],
+  ["docker logs -f --tail 100 <container>","Follow the last 100 log lines"],
+  ["docker logs --since 30m <container> 2>&1 | grep -i error","Errors in the last 30 minutes"],
+  ["docker exec -it <container> sh","Shell inside a container"],
+  ["docker exec -u 0 -it <container> sh","Shell as root"],
+  ["docker stats --no-stream","CPU and memory per container"],
+  ["docker inspect <container> --format '{{.State.Status}} {{.State.ExitCode}} {{.State.OOMKilled}}'","Status, exit code, OOM-killed?"],
+  ["docker inspect <container> --format '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}'","Container IP"],
+  ["docker top <container>","Processes inside a container"],
+  ["docker cp <container>:<path> <local-path>","Copy a file out of a container"],
+  ["docker run --rm -it --entrypoint sh <image>","Explore an image interactively"],
+  ["docker run -d --name <name> --restart unless-stopped -p 8080:80 -v <vol>:/data <image>","Run a long-lived container"],
+  ["docker restart <container>","Restart a container"],
+  ["docker update --restart unless-stopped <container>","Change restart policy"]]],
+ ["Images",[
+  ["docker build -t <repo>:<tag> .","Build an image"],
+  ["docker build --no-cache --pull -t <repo>:<tag> .","Clean rebuild with fresh base image"],
+  ["docker buildx build --platform linux/amd64,linux/arm64 -t <repo>:<tag> --push .","Multi-arch build and push"],
+  ["docker images --format 'table {{.Repository}}\\t{{.Tag}}\\t{{.Size}}'","Local images with size"],
+  ["docker tag <image> <registry>/<repo>:<tag>","Retag for a registry"],
+  ["docker push <registry>/<repo>:<tag>","Push to a registry"],
+  ["docker pull <image>@sha256:<digest>","Pull an exact digest"],
+  ["docker history --no-trunc <image>","Layers and the commands that made them"],
+  ["docker save <image> | gzip > <image>.tar.gz","Export an image to a file (air-gapped transfer)"],
+  ["docker load < <image>.tar.gz","Import an image from a file"],
+  ["docker login <registry>","Log in to a registry"]]],
+ ["Compose",[
+  ["docker compose up -d --build","Build and start in background"],
+  ["docker compose ps","Service status"],
+  ["docker compose logs -f --tail 100 <service>","Follow one service's logs"],
+  ["docker compose exec <service> sh","Shell into a service"],
+  ["docker compose pull && docker compose up -d","Update to newer images"],
+  ["docker compose config","Show the resolved configuration"],
+  ["docker compose restart <service>","Restart one service"],
+  ["docker compose down","Stop and remove containers"],
+  ["!docker compose down -v","Also delete named volumes (data loss)"]]],
+ ["Networks & volumes",[
+  ["docker network ls","Networks"],
+  ["docker network inspect <network> --format '{{range .Containers}}{{.Name}} {{.IPv4Address}}\\n{{end}}'","Containers on a network"],
+  ["docker volume ls","Volumes"],
+  ["docker volume inspect <volume>","Where a volume lives on disk"],
+  ["docker run --rm -v <volume>:/data -v $(pwd):/backup alpine tar czf /backup/<volume>.tgz -C /data .","Back up a volume to a tarball"]]],
+ ["Cleanup & daemon",[
+  ["docker system df -v","Disk used by images, containers, volumes"],
+  ["!docker system prune -f","Remove stopped containers, unused networks, dangling images"],
+  ["!docker image prune -a --filter \"until=168h\"","Remove unused images older than 7 days"],
+  ["!docker volume prune -f","Remove unused volumes"],
+  ["docker builder prune --keep-storage 10GB","Trim build cache"],
+  ["sudo systemctl restart docker","Restart the daemon"],
+  ["docker info | grep -E 'Storage Driver|Docker Root Dir|Cgroup'","Storage driver, data root, cgroup"],
+  ["sudo journalctl -u docker --since '1 hour ago'","Daemon logs"]]]
+]);
+
+C("podman","Podman","podman","Containers","Rootless containers, pods and systemd.",[
+ ["Everyday",[
+  ["podman ps -a","All containers"],
+  ["podman logs -f <container>","Follow logs"],
+  ["podman exec -it <container> sh","Shell into a container"],
+  ["podman build -t <repo>:<tag> .","Build an image"],
+  ["podman run -d --name <name> -p 8080:80 <image>","Run a container"],
+  ["podman pod create --name <pod> -p 8080:80","Create a pod (shared network)"],
+  ["podman pod ps","Pods"],
+  ["podman generate kube <container-or-pod> > <name>.yaml","Export as Kubernetes YAML"],
+  ["podman kube play <name>.yaml","Run Kubernetes YAML locally"]]],
+ ["systemd & cleanup",[
+  ["podman generate systemd --new --name <container> --files","Create a systemd unit (older way; prefer Quadlet)"],
+  ["systemctl --user daemon-reload && systemctl --user start <name>","Start a user-level container service"],
+  ["loginctl enable-linger <user>","Keep user services running after logout"],
+  ["podman auto-update","Update containers labelled for auto-update"],
+  ["podman system df","Disk usage"],
+  ["!podman system prune -a","Remove all unused data"]]]
+]);
+
+C("k8s","Kubernetes","kubectl","Containers","Context, workloads, debugging, rollouts, config, RBAC.",[
+ ["Context",[
+  ["kubectl config get-contexts","Available clusters"],
+  ["kubectl config current-context","Which cluster you're pointed at"],
+  ["kubectl config use-context <context>","Switch cluster"],
+  ["kubectl config set-context --current --namespace=<ns>","Set default namespace"],
+  ["kubectl cluster-info","API server and core service endpoints"],
+  ["kubectl version","Client and server versions"],
+  ["kubectl api-resources --namespaced=true","Resource types and short names"],
+  ["kubectl explain deployment.spec.strategy","Built-in docs for any field"]]],
+ ["Look around",[
+  ["kubectl get pods -A -o wide","All pods, all namespaces, with node and IP"],
+  ["kubectl get pods -A --field-selector=status.phase!=Running","Pods not Running"],
+  ["kubectl get pods -A | grep -v -E 'Running|Completed'","Anything unhealthy at a glance"],
+  ["kubectl get pods -n <ns> --sort-by='.status.containerStatuses[0].restartCount'","Pods sorted by restarts"],
+  ["kubectl get all -n <ns>","Common resources in a namespace"],
+  ["kubectl get deploy,sts,ds -n <ns>","Deployments, StatefulSets, DaemonSets"],
+  ["kubectl get svc,ing,endpoints -n <ns>","Services, ingresses, endpoints"],
+  ["kubectl get events -n <ns> --sort-by=.lastTimestamp","Recent events, newest last"],
+  ["kubectl get events -A --field-selector type=Warning","Warnings across the cluster"],
+  ["kubectl get pods -n <ns> -l app=<app> -o custom-columns=NAME:.metadata.name,IMAGE:.spec.containers[*].image","Pods and their images"],
+  ["kubectl get pods -n <ns> -o jsonpath='{range .items[*]}{.metadata.name}{\"\\t\"}{.status.phase}{\"\\n\"}{end}'","Custom output with jsonpath"],
+  ["kubectl get pods -n <ns> -w","Watch pods change live"]]],
+ ["Resource usage",[
+  ["kubectl top nodes","Node CPU and memory (metrics-server)"],
+  ["kubectl top pods -A --sort-by=memory | head -20","Top memory pods cluster-wide"],
+  ["kubectl top pods -n <ns> --containers","Per-container usage"],
+  ["kubectl describe node <node> | grep -A8 'Allocated resources'","Requests/limits vs capacity on a node"],
+  ["kubectl get resourcequota,limitrange -n <ns>","Quotas and default limits"],
+  ["kubectl get hpa -A","Autoscalers: current vs target"]]],
+ ["Debug",[
+  ["kubectl describe pod <pod> -n <ns>","Status, events and reasons"],
+  ["kubectl logs -f <pod> -n <ns> -c <container>","Follow a container's logs"],
+  ["kubectl logs <pod> -n <ns> --previous","Logs from the crashed previous run"],
+  ["kubectl logs -n <ns> -l app=<app> --all-containers --prefix --since=15m","Logs from all pods of an app"],
+  ["kubectl logs deploy/<name> -n <ns> --tail=200","Logs from one pod of a deployment"],
+  ["kubectl exec -it <pod> -n <ns> -- sh","Shell into a pod"],
+  ["kubectl port-forward svc/<svc> 8080:<port> -n <ns>","Reach a service on localhost:8080"],
+  ["kubectl debug -it <pod> -n <ns> --image=busybox --target=<container>","Ephemeral debug container"],
+  ["kubectl debug node/<node> -it --image=ubuntu","Shell on a node (host at /host)"],
+  ["kubectl run tmp-shell --rm -it --image=nicolaka/netshoot -n <ns> -- bash","Throwaway pod with network tools"],
+  ["kubectl run tmp --rm -it --image=busybox -n <ns> -- nslookup <svc>.<ns>.svc.cluster.local","Test in-cluster DNS"],
+  ["kubectl get pod <pod> -n <ns> -o yaml | less","Full live spec and status"],
+  ["kubectl get endpoints <svc> -n <ns>","Does the service have backing pods?"]]],
+ ["Deploy & roll back",[
+  ["kubectl apply -f <file-or-dir>","Create/update from manifests"],
+  ["kubectl diff -f <file-or-dir>","Preview what apply would change"],
+  ["kubectl apply -f <file> --dry-run=server","Server-side validation without changing anything"],
+  ["kubectl rollout status deploy/<name> -n <ns>","Watch a rollout until done"],
+  ["kubectl rollout history deploy/<name> -n <ns>","Revision history"],
+  ["kubectl rollout restart deploy/<name> -n <ns>","Restart all pods of a deployment"],
+  ["kubectl rollout undo deploy/<name> -n <ns>","Roll back to previous revision"],
+  ["kubectl rollout undo deploy/<name> -n <ns> --to-revision=<n>","Roll back to a specific revision"],
+  ["kubectl rollout pause deploy/<name> -n <ns>","Pause a rollout (resume to continue)"],
+  ["kubectl scale deploy/<name> --replicas=<n> -n <ns>","Change replica count"],
+  ["kubectl set image deploy/<name> <container>=<image>:<tag> -n <ns>","Update a container image"],
+  ["kubectl autoscale deploy/<name> --min=2 --max=10 --cpu-percent=70 -n <ns>","Create an HPA"],
+  ["kubectl create deployment <name> --image=<image> --dry-run=client -o yaml > deploy.yaml","Generate a manifest skeleton"]]],
+ ["Config & secrets",[
+  ["kubectl get cm,secret -n <ns>","ConfigMaps and Secrets"],
+  ["kubectl get secret <secret> -n <ns> -o jsonpath='{.data.<key>}' | base64 -d","Decode one secret value"],
+  ["kubectl get secret <secret> -n <ns> -o go-template='{{range $k,$v := .data}}{{$k}}={{$v | base64decode}}{{\"\\n\"}}{{end}}'","Decode all values of a secret"],
+  ["kubectl create secret generic <secret> -n <ns> --from-literal=<key>=<value> --dry-run=client -o yaml","Secret manifest (pipe to kubeseal/sops)"],
+  ["kubectl create secret docker-registry <secret> -n <ns> --docker-server=<registry> --docker-username=<user> --docker-password=<password>","Image pull secret"],
+  ["kubectl create configmap <cm> -n <ns> --from-file=<file>","ConfigMap from a file"],
+  ["kubectl label pod <pod> -n <ns> <key>=<value> --overwrite","Add/change a label"],
+  ["kubectl annotate deploy <name> -n <ns> <key>=<value> --overwrite","Add/change an annotation"]]],
+ ["Jobs & storage",[
+  ["kubectl get cronjobs,jobs -n <ns>","CronJobs and Jobs"],
+  ["kubectl create job <job>-manual --from=cronjob/<cronjob> -n <ns>","Run a CronJob now"],
+  ["kubectl patch cronjob <cronjob> -n <ns> -p '{\"spec\":{\"suspend\":true}}'","Suspend a CronJob"],
+  ["kubectl get pvc -n <ns> && kubectl get pv","Volume claims and volumes"],
+  ["kubectl get storageclass","Storage classes (default marked)"],
+  ["kubectl get volumeattachments","Which volumes are attached to which nodes"]]],
+ ["RBAC & access",[
+  ["kubectl auth can-i --list -n <ns>","What you can do in a namespace"],
+  ["kubectl auth can-i <verb> <resource> -n <ns> --as=system:serviceaccount:<ns>:<sa>","What a service account can do"],
+  ["kubectl get rolebindings,clusterrolebindings -A -o wide | grep <subject>","Bindings for a user/SA"],
+  ["kubectl create token <sa> -n <ns> --duration=1h","Short-lived token for a service account"]]],
+ ["Nodes & cluster",[
+  ["kubectl get nodes -o wide","Nodes with version, OS, IP"],
+  ["kubectl get nodes -L topology.kubernetes.io/zone,node.kubernetes.io/instance-type","Nodes with zone and instance type"],
+  ["kubectl describe node <node> | grep -A5 Conditions","Node conditions (pressure, ready)"],
+  ["kubectl cordon <node>","Stop scheduling on a node"],
+  ["!kubectl drain <node> --ignore-daemonsets --delete-emptydir-data","Evict pods before maintenance"],
+  ["kubectl uncordon <node>","Allow scheduling again"],
+  ["kubectl taint nodes <node> <key>=<value>:NoSchedule","Taint a node (add - at end to remove)"],
+  ["kubectl get pods -A -o wide --field-selector spec.nodeName=<node>","Pods on a node"],
+  ["kubectl get --raw='/readyz?verbose'","API server health checks"],
+  ["kubectl get pdb -A","PodDisruptionBudgets (can block drains)"]]],
+ ["Cleanup & backup",[
+  ["kubectl delete pod <pod> -n <ns>","Delete a pod (controller recreates it)"],
+  ["kubectl delete pods -A --field-selector=status.phase==Failed","Remove failed/evicted pods"],
+  ["!kubectl delete pod <pod> -n <ns> --grace-period=0 --force","Force-delete a stuck pod"],
+  ["kubectl patch <kind> <name> -n <ns> -p '{\"metadata\":{\"finalizers\":null}}' --type=merge","Clear finalizers on a stuck resource (last resort)"],
+  ["velero backup create <name> --include-namespaces <ns>","Velero: back up a namespace"],
+  ["velero backup get && velero backup describe <name> --details","Velero: list/inspect backups"],
+  ["velero restore create --from-backup <name>","Velero: restore"],
+  ["velero schedule create daily-<ns> --schedule='0 2 * * *' --include-namespaces <ns> --ttl 168h","Velero: nightly backup kept 7 days"]]]
+]);
+
+C("helm","Helm","helm","Containers","Charts, releases, upgrades, rollbacks, OCI.",[
+ ["Repos & charts",[
+  ["helm repo add <name> <url> && helm repo update","Add repo and refresh"],
+  ["helm repo list","Configured repos"],
+  ["helm search repo <keyword> --versions | head","Charts and versions"],
+  ["helm show values <repo>/<chart> --version <ver> > values.yaml","Default values of a chart"],
+  ["helm show chart <repo>/<chart>","Chart metadata and appVersion"],
+  ["helm pull <repo>/<chart> --version <ver> --untar","Download and unpack"],
+  ["helm dependency update <chart-dir>","Fetch subcharts"],
+  ["helm registry login <registry>","Log in to an OCI registry"],
+  ["helm push <chart>-<ver>.tgz oci://<registry>/<path>","Push a chart to OCI registry"],
+  ["helm install <release> oci://<registry>/<path>/<chart> --version <ver>","Install from OCI registry"]]],
+ ["Releases",[
+  ["helm list -A","All releases"],
+  ["helm list -A --failed --pending","Releases in a bad or stuck state"],
+  ["helm upgrade --install <release> <chart> -n <ns> --create-namespace -f values.yaml --atomic --wait --timeout 10m","Install or upgrade; auto-rollback on failure"],
+  ["helm upgrade <release> <chart> -n <ns> --reuse-values --set image.tag=<tag>","Change one value, keep the rest"],
+  ["helm status <release> -n <ns>","Status and notes"],
+  ["helm get values <release> -n <ns> --all","Values actually in use"],
+  ["helm get manifest <release> -n <ns>","Rendered manifests of the live release"],
+  ["helm history <release> -n <ns>","Revision history"],
+  ["helm rollback <release> <revision> -n <ns> --wait","Roll back to a revision"],
+  ["!helm uninstall <release> -n <ns>","Remove a release"]]],
+ ["Develop & check",[
+  ["helm create <chart>","Scaffold a new chart"],
+  ["helm lint <chart-dir> -f values.yaml","Lint a chart"],
+  ["helm template <release> <chart-dir> -f values.yaml","Render locally"],
+  ["helm template <release> <chart-dir> -f values.yaml | kubectl apply --dry-run=server -f -","Validate rendered output against the cluster"],
+  ["helm upgrade <release> <chart> -n <ns> -f values.yaml --dry-run --debug","Preview an upgrade"],
+  ["helm diff upgrade <release> <chart> -n <ns> -f values.yaml","What an upgrade changes (helm-diff plugin)"],
+  ["helm package <chart-dir> --version <ver>","Package a chart"],
+  ["helm plugin list","Installed plugins"]]]
+]);
+
+C("kustomize","Kustomize","kustomize","Containers","Overlays and patches without templates.",[
+ ["Everyday",[
+  ["kubectl kustomize overlays/<env>","Render an overlay"],
+  ["kubectl apply -k overlays/<env>","Apply an overlay"],
+  ["kubectl diff -k overlays/<env>","Preview changes"],
+  ["kustomize edit set image <image>=<image>:<tag>","Pin an image tag in kustomization.yaml"],
+  ["kustomize edit add resource <file>.yaml","Add a resource"],
+  ["kustomize build overlays/<env> | kubeconform -strict -summary","Validate rendered YAML against schemas"]]]
+]);
+
+C("openshift","OpenShift","oc","Containers","Projects, builds, routes, operators, cluster health.",[
+ ["Login & projects",[
+  ["oc login <api-url> --token=<token>","Log in with a token"],
+  ["oc whoami && oc whoami --show-console","Current user and console URL"],
+  ["oc projects","Projects you can access"],
+  ["oc project <project>","Switch project"],
+  ["oc new-project <project>","Create a project"],
+  ["oc status --suggest","Overview of the project with hints"]]],
+ ["Workloads",[
+  ["oc get pods -o wide","Pods"],
+  ["oc logs -f deploy/<name>","Follow a deployment's logs"],
+  ["oc rsh <pod>","Remote shell into a pod"],
+  ["oc rsync <pod>:<path> <local-dir>","Copy files from a pod"],
+  ["oc get events --sort-by=.lastTimestamp","Recent events"],
+  ["oc rollout restart deploy/<name>","Restart a deployment"],
+  ["oc rollout undo deploy/<name>","Roll back"],
+  ["oc scale deploy/<name> --replicas=<n>","Scale"],
+  ["oc set env deploy/<name> <KEY>=<value>","Set an environment variable"],
+  ["oc set resources deploy/<name> --requests=cpu=100m,memory=256Mi --limits=memory=512Mi","Set requests/limits"],
+  ["oc adm top pods","Pod usage"],
+  ["oc debug deploy/<name>","Debug copy of a pod with a shell"]]],
+ ["Build & expose",[
+  ["oc new-app <image-or-git-url> --name=<name>","App from image or Git repo"],
+  ["oc start-build <buildconfig> --follow","Trigger a build and stream logs"],
+  ["oc start-build <buildconfig> --from-dir=. --follow","Binary build from local directory"],
+  ["oc get builds","Build history"],
+  ["oc get is","Image streams"],
+  ["oc tag <src-is>:<tag> <dst-is>:<tag>","Promote an image between streams"],
+  ["oc expose svc/<svc>","Route for a service"],
+  ["oc get routes","Routes and hostnames"],
+  ["oc create route edge --service=<svc> --hostname=<host>","TLS edge route"],
+  ["oc registry login","Log in to the internal registry"]]],
+ ["Security & access",[
+  ["oc adm policy add-role-to-user <role> <user> -n <project>","Grant a role in a project"],
+  ["oc adm policy add-scc-to-user anyuid -z <sa> -n <project>","Allow a SA to run as any UID (use sparingly)"],
+  ["oc get scc","Security context constraints"],
+  ["oc adm policy who-can <verb> <resource> -n <project>","Who can do something"],
+  ["oc get pod <pod> -o jsonpath='{.metadata.annotations.openshift\\.io/scc}'","Which SCC admitted a pod"]]],
+ ["Cluster admin",[
+  ["oc get clusterversion","Version and update status"],
+  ["oc adm upgrade","Available updates"],
+  ["oc get co","Cluster operators: available/progressing/degraded"],
+  ["oc get mcp","Machine config pools (node updates)"],
+  ["oc get nodes && oc adm top nodes","Node status and usage"],
+  ["oc get csr -o name | xargs oc adm certificate approve","Approve pending CSRs"],
+  ["oc debug node/<node> -- chroot /host journalctl -u kubelet --since '30 min ago'","Kubelet logs on a node"],
+  ["oc get csv -A","Installed operators (ClusterServiceVersions)"],
+  ["oc get subscriptions -A","Operator subscriptions and channels"],
+  ["oc adm inspect co/<operator>","Collect data for one operator"],
+  ["oc adm must-gather","Full diagnostics for support"]]]
+]);
+
+C("istio","Istio","istioctl","Containers","Service mesh config and traffic debugging.",[
+ ["Everyday",[
+  ["istioctl version","Control plane and data plane versions"],
+  ["istioctl proxy-status","Is every sidecar in sync with istiod"],
+  ["istioctl analyze -n <ns>","Find config problems"],
+  ["istioctl x describe pod <pod> -n <ns>","Which routes/policies apply to a pod"],
+  ["istioctl proxy-config routes <pod> -n <ns>","Routes seen by a sidecar"],
+  ["istioctl proxy-config cluster <pod> -n <ns> | grep <svc>","Upstream clusters for a service"],
+  ["kubectl label namespace <ns> istio-injection=enabled --overwrite","Enable sidecar injection"],
+  ["kubectl logs <pod> -n <ns> -c istio-proxy --tail=100","Sidecar (Envoy) logs"],
+  ["kubectl get vs,dr,gw,peerauthentication -n <ns>","VirtualServices, DestinationRules, Gateways, mTLS"]]]
+]);
+
+C("tf","Terraform","terraform","IaC & GitOps","Plan, apply, state, modules, workspaces.",[
+ ["Workflow",[
+  ["terraform init -upgrade","Install providers/modules at allowed versions"],
+  ["terraform init -backend-config=<env>.backend.hcl -reconfigure","Init with environment-specific backend"],
+  ["terraform fmt -recursive && terraform validate","Format and validate"],
+  ["terraform plan -out=tfplan","Preview changes and save the plan"],
+  ["terraform plan -var-file=<env>.tfvars -out=tfplan","Plan with environment variables"],
+  ["terraform apply tfplan","Apply exactly the saved plan"],
+  ["terraform plan -target=<resource.addr>","Plan one resource (use sparingly)"],
+  ["terraform apply -replace=<resource.addr>","Force-recreate one resource"],
+  ["terraform show -json tfplan | jq -r '.resource_changes[] | select(.change.actions != [\"no-op\"]) | \"\\(.change.actions|join(\",\")) \\(.address)\"'","One-line summary of a saved plan"],
+  ["terraform output -json","All outputs as JSON"],
+  ["terraform output -raw <name>","One output value for scripts"],
+  ["TF_LOG=DEBUG terraform plan 2> tf-debug.log","Debug logging to a file"]]],
+ ["State",[
+  ["terraform state list","Resources in state"],
+  ["terraform state list | grep <pattern>","Find a resource address"],
+  ["terraform state show <resource.addr>","Attributes of one resource"],
+  ["terraform state mv <old.addr> <new.addr>","Rename without recreating (or use a moved block)"],
+  ["terraform import <resource.addr> <id>","Adopt an existing resource (or use an import block)"],
+  ["terraform plan -generate-config-out=generated.tf","Write HCL for import blocks"],
+  ["terraform plan -refresh-only","Detect drift"],
+  ["terraform apply -refresh-only","Accept drift into state"],
+  ["terraform state pull > state-backup.json","Back up remote state locally"],
+  ["!terraform state rm <resource.addr>","Stop tracking a resource (it keeps existing)"],
+  ["terraform force-unlock <lock-id>","Release a stuck lock"]]],
+ ["Modules, providers & workspaces",[
+  ["terraform providers","Required providers"],
+  ["terraform providers lock -platform=linux_amd64 -platform=darwin_arm64","Lock hashes for multiple platforms"],
+  ["terraform get -update","Refresh modules"],
+  ["terraform workspace list","Workspaces"],
+  ["terraform workspace select -or-create <name>","Switch (or create) workspace"],
+  ["terraform console","Test expressions interactively"],
+  ["terraform graph | dot -Tsvg > graph.svg","Dependency graph (Graphviz)"],
+  ["terraform test","Run .tftest.hcl tests"],
+  ["tflint --recursive","Lint for provider-specific issues"],
+  ["checkov -d . --quiet","Security/misconfiguration scan"],
+  ["infracost breakdown --path .","Cost estimate of the configuration"],
+  ["!terraform destroy","Destroy everything in this configuration"]]]
+]);
+
+C("ansible","Ansible","ansible","IaC & GitOps","Inventory, ad-hoc tasks, playbooks, vault, roles.",[
+ ["Inventory & ad-hoc",[
+  ["ansible-inventory -i <inventory> --graph","Hosts and groups as a tree"],
+  ["ansible-inventory -i <inventory> --host <host>","Variables for one host"],
+  ["ansible all -i <inventory> -m ping","Connectivity to all hosts"],
+  ["ansible <group> -i <inventory> -m shell -a 'uptime'","Run a command on a group"],
+  ["ansible <group> -i <inventory> -b -m service -a 'name=<svc> state=restarted'","Restart a service with sudo"],
+  ["ansible <group> -i <inventory> -b -m package -a 'name=<pkg> state=latest'","Update a package"],
+  ["ansible <group> -i <inventory> -m copy -a 'src=<file> dest=<path> mode=0644' -b","Push a file"],
+  ["ansible <host> -i <inventory> -m setup -a 'filter=ansible_distribution*'","Gather selected facts"],
+  ["ansible <group> -i <inventory> -m shell -a 'df -h /' -f 20","Run on 20 hosts in parallel"]]],
+ ["Playbooks",[
+  ["ansible-playbook -i <inventory> site.yml --syntax-check","Syntax check"],
+  ["ansible-playbook -i <inventory> site.yml --check --diff","Dry run showing changes"],
+  ["ansible-playbook -i <inventory> site.yml --limit <host-or-group>","Subset of hosts"],
+  ["ansible-playbook -i <inventory> site.yml --tags <tag>","Only tagged tasks"],
+  ["ansible-playbook -i <inventory> site.yml --skip-tags <tag>","Skip tagged tasks"],
+  ["ansible-playbook -i <inventory> site.yml -e '<var>=<value>'","Override a variable"],
+  ["ansible-playbook -i <inventory> site.yml --list-hosts --list-tasks","Targets and tasks without running"],
+  ["ansible-playbook -i <inventory> site.yml --start-at-task \"<task name>\"","Resume from a task"],
+  ["ansible-playbook -i <inventory> site.yml --step","Confirm each task interactively"],
+  ["ansible-playbook -i <inventory> site.yml -vvv","Very verbose"],
+  ["ansible-playbook -i <inventory> site.yml --limit @site.retry","Re-run only failed hosts (if retry files enabled)"]]],
+ ["Vault, roles & tooling",[
+  ["ansible-vault create <file>.yml","Create encrypted vars file"],
+  ["ansible-vault edit <file>.yml","Edit encrypted file"],
+  ["ansible-vault view <file>.yml","View encrypted file"],
+  ["ansible-vault encrypt_string '<secret>' --name '<var>'","Encrypt one value for YAML"],
+  ["ansible-vault rekey <file>.yml","Change the vault password"],
+  ["ansible-playbook site.yml --vault-password-file ~/.vault_pass","Run using a password file"],
+  ["ansible-galaxy install -r requirements.yml","Install roles and collections"],
+  ["ansible-galaxy collection list","Installed collections"],
+  ["ansible-galaxy role init <role>","Scaffold a role"],
+  ["ansible-lint <playbook-or-dir>","Lint"],
+  ["ansible-doc <module>","Module docs"],
+  ["ansible-config dump --only-changed","Non-default settings in effect"],
+  ["molecule test","Test a role with Molecule"]]]
+]);
+
+C("argocd","Argo CD","argocd","IaC & GitOps","GitOps apps: status, sync, diff, rollback.",[
+ ["Apps",[
+  ["argocd login <server> --sso","Log in (or --username/--password)"],
+  ["argocd app list","Apps with sync and health"],
+  ["argocd app list -o name | xargs -n1 argocd app get --refresh >/dev/null","Hard refresh all apps"],
+  ["argocd app get <app>","Details and resource tree"],
+  ["argocd app diff <app>","Live vs Git"],
+  ["argocd app sync <app> --prune","Sync and remove orphans"],
+  ["argocd app sync <app> --resource <group>:<kind>:<name>","Sync one resource"],
+  ["argocd app wait <app> --health --timeout 300","Wait until healthy"],
+  ["argocd app history <app>","Deployment history"],
+  ["argocd app rollback <app> <history-id>","Roll back (auto-sync must be off)"],
+  ["argocd app set <app> --revision <branch-or-tag>","Change target revision"],
+  ["argocd app set <app> --sync-policy none","Disable auto-sync"],
+  ["argocd app terminate-op <app>","Stop a stuck sync"]]],
+ ["Admin",[
+  ["argocd cluster list","Registered clusters"],
+  ["argocd repo list","Registered repositories"],
+  ["argocd proj list","Projects"],
+  ["kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath='{.data.password}' | base64 -d","Initial admin password"],
+  ["kubectl -n argocd logs deploy/argocd-repo-server --tail=100","Repo server logs (manifest errors)"],
+  ["kubectl -n argocd rollout restart deploy argocd-repo-server","Restart repo server"]]]
+]);
+
+C("packer","Packer","packer","IaC & GitOps","Build machine images.",[
+ ["Everyday",[
+  ["packer init .","Install required plugins"],
+  ["packer fmt . && packer validate .","Format and validate"],
+  ["packer build -var-file=<env>.pkrvars.hcl .","Build images"],
+  ["packer build -only='<source>.*' .","Build only one source"],
+  ["PACKER_LOG=1 packer build -on-error=ask .","Debug a failing build"]]]
+]);
+
+C("aws","AWS","aws","Cloud","Identity, compute, containers, storage, databases, logs, cost.",[
+ ["Identity",[
+  ["aws sts get-caller-identity","Which account and role"],
+  ["aws configure sso","Set up an SSO profile"],
+  ["aws sso login --profile <profile>","Log in with Identity Center"],
+  ["export AWS_PROFILE=<profile> AWS_REGION=<region>","Profile and region for this shell"],
+  ["aws configure list-profiles","Configured profiles"],
+  ["aws sts assume-role --role-arn <role-arn> --role-session-name <name>","Assume a role"],
+  ["aws iam list-attached-role-policies --role-name <role>","Policies on a role"],
+  ["aws iam simulate-principal-policy --policy-source-arn <arn> --action-names <service>:<action>","Would this principal be allowed?"]]],
+ ["EC2",[
+  ["aws ec2 describe-instances --filters Name=instance-state-name,Values=running --query 'Reservations[].Instances[].[InstanceId,Tags[?Key==`Name`]|[0].Value,PrivateIpAddress,InstanceType]' --output table","Running instances"],
+  ["aws ssm start-session --target <instance-id>","Shell without SSH"],
+  ["aws ssm start-session --target <instance-id> --document-name AWS-StartPortForwardingSessionToRemoteHost --parameters host=<db-host>,portNumber=5432,localPortNumber=5432","Port-forward to a private DB via SSM"],
+  ["aws ec2 start-instances --instance-ids <instance-id>","Start (also stop-instances / reboot-instances)"],
+  ["aws ec2 describe-security-groups --group-ids <sg-id> --query 'SecurityGroups[].IpPermissions'","Inbound rules"],
+  ["aws ec2 get-console-output --instance-id <instance-id> --latest --output text","Serial console log"],
+  ["aws autoscaling describe-auto-scaling-groups --query 'AutoScalingGroups[].[AutoScalingGroupName,DesiredCapacity,MinSize,MaxSize]' --output table","Auto Scaling groups"]]],
+ ["Containers",[
+  ["aws eks update-kubeconfig --name <cluster> --region <region>","Add EKS to kubeconfig"],
+  ["aws eks list-clusters && aws eks describe-cluster --name <cluster> --query cluster.version","Clusters and version"],
+  ["aws eks list-nodegroups --cluster-name <cluster>","Node groups"],
+  ["aws ecr get-login-password | docker login --username AWS --password-stdin <acct>.dkr.ecr.<region>.amazonaws.com","Docker login to ECR"],
+  ["aws ecr describe-images --repository-name <repo> --query 'sort_by(imageDetails,&imagePushedAt)[-5:].imageTags'","Last 5 pushed tags"],
+  ["aws ecs list-services --cluster <cluster>","ECS services"],
+  ["aws ecs update-service --cluster <cluster> --service <svc> --force-new-deployment","Redeploy ECS service"],
+  ["aws ecs execute-command --cluster <cluster> --task <task-id> --container <container> --interactive --command sh","Shell into an ECS task"]]],
+ ["Storage & data",[
+  ["aws s3 ls s3://<bucket>/<prefix>/ --human-readable --summarize","List objects and total size"],
+  ["aws s3 sync <dir> s3://<bucket>/<prefix> --delete","Mirror a directory (deletes extras)"],
+  ["aws s3 cp s3://<bucket>/<key> -","Print an object to stdout"],
+  ["aws s3 presign s3://<bucket>/<key> --expires-in 3600","Temporary download link"],
+  ["aws rds describe-db-instances --query 'DBInstances[].[DBInstanceIdentifier,DBInstanceStatus,Engine,DBInstanceClass]' --output table","RDS instances"],
+  ["aws rds create-db-snapshot --db-instance-identifier <db> --db-snapshot-identifier <db>-$(date +%F)","Manual RDS snapshot"],
+  ["aws secretsmanager get-secret-value --secret-id <name> --query SecretString --output text","Read a secret"],
+  ["aws ssm get-parameter --name <name> --with-decryption --query Parameter.Value --output text","Read a parameter"]]],
+ ["Logs, DNS & cost",[
+  ["aws logs tail <log-group> --follow --since 15m","Follow CloudWatch logs"],
+  ["aws logs tail <log-group> --since 1h --filter-pattern ERROR","Errors in the last hour"],
+  ["aws cloudwatch describe-alarms --state-value ALARM --query 'MetricAlarms[].AlarmName'","Alarms firing"],
+  ["aws route53 list-resource-record-sets --hosted-zone-id <zone-id> --query \"ResourceRecordSets[?Name=='<name>.']\"","A DNS record"],
+  ["aws elbv2 describe-target-health --target-group-arn <tg-arn>","Load balancer target health"],
+  ["aws ce get-cost-and-usage --time-period Start=$(date +%Y-%m-01),End=$(date +%F) --granularity MONTHLY --metrics UnblendedCost --group-by Type=DIMENSION,Key=SERVICE","Month-to-date cost by service"]]]
+]);
+
+C("azure","Azure","az","Cloud","Subscriptions, VMs, AKS, storage, Key Vault, monitoring.",[
+ ["Identity",[
+  ["az login","Sign in (--use-device-code on servers)"],
+  ["az account show -o table","Current subscription"],
+  ["az account list -o table","All subscriptions"],
+  ["az account set --subscription <name-or-id>","Switch subscription"],
+  ["az role assignment list --assignee <user-or-sp> --all -o table","Role assignments"]]],
+ ["Resources & VMs",[
+  ["az group list -o table","Resource groups"],
+  ["az resource list -g <rg> -o table","Everything in a resource group"],
+  ["az vm list -d -o table","VMs with power state and IPs"],
+  ["az vm start -g <rg> -n <vm>","Start (also stop / restart / deallocate)"],
+  ["az vm run-command invoke -g <rg> -n <vm> --command-id RunShellScript --scripts 'uptime'","Run a command on a VM without SSH"],
+  ["az network nsg rule list -g <rg> --nsg-name <nsg> -o table","NSG rules"],
+  ["az network public-ip list -o table","Public IPs"]]],
+ ["AKS & containers",[
+  ["az aks get-credentials -g <rg> -n <cluster>","Add AKS to kubeconfig"],
+  ["az aks show -g <rg> -n <cluster> -o table","Cluster version and state"],
+  ["az aks nodepool list -g <rg> --cluster-name <cluster> -o table","Node pools"],
+  ["az aks nodepool scale -g <rg> --cluster-name <cluster> -n <pool> --node-count <n>","Scale a node pool"],
+  ["az aks get-upgrades -g <rg> -n <cluster> -o table","Available upgrades"],
+  ["az acr login -n <registry>","Docker login to ACR"],
+  ["az acr repository show-tags -n <registry> --repository <repo> --orderby time_desc --top 5","Latest tags"],
+  ["az webapp log tail -g <rg> -n <app>","Stream App Service logs"]]],
+ ["Storage, secrets & monitoring",[
+  ["az storage blob list --account-name <acct> -c <container> --auth-mode login -o table","List blobs"],
+  ["az storage blob upload-batch -d <container> -s <dir> --account-name <acct> --auth-mode login","Upload a directory"],
+  ["az keyvault secret show --vault-name <vault> -n <secret> --query value -o tsv","Read a Key Vault secret"],
+  ["az keyvault secret set --vault-name <vault> -n <secret> --value '<value>'","Write a secret"],
+  ["az monitor activity-log list -g <rg> --offset 1h -o table","What changed in the last hour"],
+  ["az monitor metrics alert list -o table","Metric alerts"]]]
+]);
+
+C("gcp","GCP","gcloud","Cloud","Projects, Compute, GKE, Cloud Run, storage, logs.",[
+ ["Identity",[
+  ["gcloud auth login","Sign in"],
+  ["gcloud auth application-default login","Credentials for SDKs/Terraform"],
+  ["gcloud config list","Active account, project, region"],
+  ["gcloud config set project <project-id>","Switch project"],
+  ["gcloud config configurations list","Named configurations"],
+  ["gcloud projects get-iam-policy <project-id> --flatten=bindings --filter=bindings.members:<member> --format='table(bindings.role)'","Roles of a member"]]],
+ ["Compute & GKE",[
+  ["gcloud compute instances list","VMs"],
+  ["gcloud compute ssh <instance> --zone <zone> --tunnel-through-iap","SSH via IAP (no public IP)"],
+  ["gcloud compute instances start <instance> --zone <zone>","Start (also stop / reset)"],
+  ["gcloud compute firewall-rules list","Firewall rules"],
+  ["gcloud container clusters list","GKE clusters"],
+  ["gcloud container clusters get-credentials <cluster> --region <region>","Add GKE to kubeconfig"],
+  ["gcloud container node-pools list --cluster <cluster> --region <region>","Node pools"],
+  ["gcloud auth configure-docker <region>-docker.pkg.dev","Docker auth for Artifact Registry"]]],
+ ["Serverless, storage & logs",[
+  ["gcloud run deploy <service> --image <image> --region <region>","Deploy to Cloud Run"],
+  ["gcloud run services list","Cloud Run services and URLs"],
+  ["gcloud run services update-traffic <service> --to-revisions <revision>=100 --region <region>","Shift all traffic to a revision"],
+  ["gcloud storage ls gs://<bucket>/<prefix>","List objects"],
+  ["gcloud storage rsync -r <dir> gs://<bucket>/<prefix>","Sync a directory"],
+  ["gcloud logging read 'severity>=ERROR' --freshness=1h --limit 50","Errors from the last hour"],
+  ["gcloud logging read 'resource.type=\"k8s_container\" AND resource.labels.namespace_name=\"<ns>\"' --freshness=30m --limit 50","GKE container logs for a namespace"],
+  ["gcloud secrets versions access latest --secret=<name>","Read a secret"],
+  ["gcloud sql instances list","Cloud SQL instances"]]]
+]);
+
+C("prom","Prometheus","promql","Observability","API checks, promtool, Alertmanager, everyday PromQL.",[
+ ["API & tooling",[
+  ["curl -s http://<prometheus>:9090/-/healthy && curl -s http://<prometheus>:9090/-/ready","Health and readiness"],
+  ["curl -s http://<prometheus>:9090/api/v1/targets | jq -r '.data.activeTargets[] | select(.health!=\"up\") | [.labels.job,.scrapeUrl,.lastError] | @tsv'","Targets that are down, with error"],
+  ["curl -s http://<prometheus>:9090/api/v1/alerts | jq '.data.alerts[] | {name:.labels.alertname, state}'","Active alerts"],
+  ["curl -sG http://<prometheus>:9090/api/v1/query --data-urlencode 'query=up == 0' | jq '.data.result[].metric'","Run a PromQL query from shell"],
+  ["curl -X POST http://<prometheus>:9090/-/reload","Reload config (needs --web.enable-lifecycle)"],
+  ["promtool check config prometheus.yml","Validate config"],
+  ["promtool check rules <rules>.yml","Validate alerting/recording rules"],
+  ["promtool test rules <tests>.yml","Unit-test alert rules"],
+  ["curl -s http://<prometheus>:9090/api/v1/status/tsdb | jq '.data.seriesCountByMetricName[:10]'","Top metrics by series (cardinality)"],
+  ["amtool alert query --alertmanager.url=http://<alertmanager>:9093","Alerts in Alertmanager"],
+  ["amtool silence add alertname=<name> --duration=2h --comment='<reason>' --alertmanager.url=http://<alertmanager>:9093","Silence an alert for 2 hours"],
+  ["amtool check-config alertmanager.yml","Validate Alertmanager config"]]],
+ ["PromQL — infrastructure",[
+  ["up == 0","Scrape targets that are down"],
+  ["100 - (avg by (instance) (rate(node_cpu_seconds_total{mode=\"idle\"}[5m])) * 100)","CPU usage % per node"],
+  ["(1 - node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes) * 100","Memory usage % per node"],
+  ["(1 - node_filesystem_avail_bytes{fstype!~\"tmpfs|overlay\"} / node_filesystem_size_bytes) * 100 > 85","Filesystems over 85% full"],
+  ["predict_linear(node_filesystem_avail_bytes[6h], 24*3600) < 0","Disks predicted to fill within 24h"]]],
+ ["PromQL — Kubernetes & apps",[
+  ["sum by (namespace, pod) (rate(container_cpu_usage_seconds_total{container!=\"\"}[5m]))","CPU cores per pod"],
+  ["sum by (namespace, pod) (container_memory_working_set_bytes{container!=\"\"})","Memory per pod"],
+  ["increase(kube_pod_container_status_restarts_total[1h]) > 3","Containers restarting a lot"],
+  ["kube_deployment_status_replicas_available / kube_deployment_spec_replicas < 1","Deployments missing replicas"],
+  ["sum(rate(http_requests_total{status=~\"5..\"}[5m])) / sum(rate(http_requests_total[5m]))","5xx error ratio"],
+  ["histogram_quantile(0.95, sum by (le) (rate(http_request_duration_seconds_bucket[5m])))","p95 latency"],
+  ["topk(10, count by (__name__) ({__name__=~\".+\"}))","Highest-cardinality metrics"]]]
+]);
+
+C("loki","Grafana & Loki","logql","Observability","LogQL, logcli and Grafana API.",[
+ ["logcli & LogQL",[
+  ["export LOKI_ADDR=http://<loki>:3100","Point logcli at Loki"],
+  ["logcli labels && logcli labels namespace","Available labels and values"],
+  ["logcli query '{namespace=\"<ns>\", app=\"<app>\"}' --since=30m --limit=200","Recent logs for an app"],
+  ["logcli query '{namespace=\"<ns>\"} |= \"error\" != \"healthcheck\"' --since=1h","Filter lines by text"],
+  ["logcli query --tail '{app=\"<app>\"}'","Live tail"],
+  ["sum by (app) (count_over_time({namespace=\"<ns>\"} |= \"error\" [5m]))","LogQL: error count per app"],
+  ["{app=\"<app>\"} | json | status >= 500","LogQL: parse JSON logs and filter by field"],
+  ["topk(5, sum by (pod) (rate({namespace=\"<ns>\"}[5m])))","LogQL: noisiest pods"]]],
+ ["Grafana API",[
+  ["curl -s -H \"Authorization: Bearer $GRAFANA_TOKEN\" https://<grafana>/api/health","Health"],
+  ["curl -s -H \"Authorization: Bearer $GRAFANA_TOKEN\" 'https://<grafana>/api/search?query=<text>' | jq -r '.[] | [.uid,.title] | @tsv'","Find dashboards"],
+  ["curl -s -H \"Authorization: Bearer $GRAFANA_TOKEN\" https://<grafana>/api/dashboards/uid/<uid> | jq .dashboard > <uid>.json","Export a dashboard as JSON"],
+  ["curl -s -H \"Authorization: Bearer $GRAFANA_TOKEN\" https://<grafana>/api/datasources | jq -r '.[] | [.name,.type,.url] | @tsv'","List data sources"],
+  ["curl -s -H \"Authorization: Bearer $GRAFANA_TOKEN\" https://<grafana>/api/prometheus/grafana/api/v1/alerts | jq","Grafana-managed alerts firing"]]]
+]);
+
+C("elastic","Elasticsearch","_cat","Observability","Cluster health, indices, shards (also OpenSearch).",[
+ ["Health & indices",[
+  ["export ES=https://<es-host>:9200 ESAUTH=<user>:<password>","Set once per shell"],
+  ["curl -su $ESAUTH \"$ES/_cluster/health?pretty\"","Cluster status (green/yellow/red)"],
+  ["curl -su $ESAUTH \"$ES/_cat/nodes?v&h=name,heap.percent,ram.percent,cpu,load_1m,disk.used_percent,node.role\"","Nodes with heap, CPU, disk"],
+  ["curl -su $ESAUTH \"$ES/_cat/indices?v&s=store.size:desc\" | head -20","Largest indices"],
+  ["curl -su $ESAUTH \"$ES/_cat/shards?v&h=index,shard,prirep,state,unassigned.reason\" | grep -v STARTED","Shards not started and why"],
+  ["curl -su $ESAUTH \"$ES/_cluster/allocation/explain?pretty\"","Why a shard is unassigned"],
+  ["curl -su $ESAUTH \"$ES/_cat/allocation?v\"","Disk usage per node"],
+  ["curl -su $ESAUTH \"$ES/_cat/thread_pool/search,write?v&h=node_name,name,active,queue,rejected\"","Thread pool queues and rejections"],
+  ["curl -su $ESAUTH \"$ES/<index>/_search?q=<field>:<value>&size=5&pretty\"","Quick search"],
+  ["curl -su $ESAUTH \"$ES/_cat/snapshots/<repo>?v\"","Snapshots in a repository"],
+  ["!curl -su $ESAUTH -X DELETE \"$ES/<index>\"","Delete an index"]]]
+]);
+
+C("postgres","PostgreSQL","psql","Data","Connect, inspect, slow queries, locks, replication, backup.",[
+ ["Connect & navigate",[
+  ["psql -h <host> -p 5432 -U <user> -d <db>","Connect"],
+  ["psql \"postgresql://<user>@<host>:5432/<db>?sslmode=require\"","Connect with a URI and TLS"],
+  ["pg_isready -h <host> -p 5432","Accepting connections?"],
+  ["psql -h <host> -U <user> -d <db> -c 'SELECT version();'","Run one statement from shell"],
+  ["\\l+","psql: databases with sizes"],
+  ["\\dn","psql: schemas"],
+  ["\\dt+ <schema>.*","psql: tables with sizes"],
+  ["\\d+ <table>","psql: columns, indexes, constraints"],
+  ["\\du","psql: roles"],
+  ["\\dp <table>","psql: table privileges"],
+  ["\\x auto","psql: expanded output for wide rows"],
+  ["\\timing on","psql: show query timings"],
+  ["\\conninfo","psql: current connection details"]]],
+ ["Activity & locks",[
+  ["SELECT pid, usename, datname, state, now()-query_start AS runtime, left(query,80) FROM pg_stat_activity WHERE state <> 'idle' ORDER BY runtime DESC;","Running queries, longest first"],
+  ["SELECT count(*), state FROM pg_stat_activity GROUP BY state;","Connections by state"],
+  ["SELECT count(*) AS used, current_setting('max_connections') AS max FROM pg_stat_activity;","Connections used vs max"],
+  ["SELECT usename, client_addr, count(*) FROM pg_stat_activity GROUP BY 1,2 ORDER BY 3 DESC;","Connections per user and client"],
+  ["SELECT pid, now()-xact_start AS age, state, left(query,60) FROM pg_stat_activity WHERE state = 'idle in transaction' ORDER BY age DESC;","Idle-in-transaction sessions (hold locks)"],
+  ["SELECT pid, pg_blocking_pids(pid) AS blocked_by, left(query,60) FROM pg_stat_activity WHERE cardinality(pg_blocking_pids(pid)) > 0;","Who is blocking whom"],
+  ["SELECT pg_cancel_backend(<pid>);","Cancel a query"],
+  ["!SELECT pg_terminate_backend(<pid>);","Kill a connection"]]],
+ ["Performance",[
+  ["SELECT left(query,80), calls, round(total_exec_time) AS total_ms, round(mean_exec_time::numeric,1) AS mean_ms FROM pg_stat_statements ORDER BY total_exec_time DESC LIMIT 10;","Top queries by total time (pg_stat_statements)"],
+  ["EXPLAIN (ANALYZE, BUFFERS) <query>;","Actual plan with timings"],
+  ["SELECT relname, seq_scan, idx_scan FROM pg_stat_user_tables ORDER BY seq_scan DESC LIMIT 10;","Tables with most sequential scans"],
+  ["SELECT indexrelname, idx_scan, pg_size_pretty(pg_relation_size(indexrelid)) FROM pg_stat_user_indexes WHERE idx_scan = 0 ORDER BY pg_relation_size(indexrelid) DESC;","Unused indexes"],
+  ["SELECT round(100.0 * sum(blks_hit) / nullif(sum(blks_hit) + sum(blks_read),0), 2) AS cache_hit_pct FROM pg_stat_database;","Buffer cache hit ratio"],
+  ["SHOW shared_buffers; SHOW work_mem; SHOW effective_cache_size;","Key memory settings"],
+  ["CREATE INDEX CONCURRENTLY <idx> ON <table> (<column>);","Add an index without blocking writes"]]],
+ ["Size & maintenance",[
+  ["SELECT datname, pg_size_pretty(pg_database_size(datname)) FROM pg_database ORDER BY pg_database_size(datname) DESC;","Database sizes"],
+  ["SELECT relname, pg_size_pretty(pg_total_relation_size(relid)) FROM pg_statio_user_tables ORDER BY pg_total_relation_size(relid) DESC LIMIT 10;","10 largest tables"],
+  ["SELECT relname, n_dead_tup, last_autovacuum, last_autoanalyze FROM pg_stat_user_tables ORDER BY n_dead_tup DESC LIMIT 10;","Most dead rows, last vacuum"],
+  ["SELECT datname, age(datfrozenxid) FROM pg_database ORDER BY 2 DESC;","Transaction ID age (wraparound risk)"],
+  ["VACUUM (ANALYZE, VERBOSE) <table>;","Reclaim space and refresh stats"],
+  ["REINDEX INDEX CONCURRENTLY <idx>;","Rebuild a bloated index online"]]],
+ ["Replication",[
+  ["SELECT client_addr, state, sync_state, replay_lag FROM pg_stat_replication;","Replicas and lag (on primary)"],
+  ["SELECT pg_is_in_recovery();","true = this is a replica"],
+  ["SELECT now() - pg_last_xact_replay_timestamp() AS lag;","Replay lag (on replica)"],
+  ["SELECT slot_name, active, pg_size_pretty(pg_wal_lsn_diff(pg_current_wal_lsn(), restart_lsn)) AS retained FROM pg_replication_slots;","Replication slots and WAL they retain"],
+  ["patronictl -c /etc/patroni.yml list","Patroni cluster members and leader"],
+  ["kubectl cnpg status <cluster> -n <ns>","CloudNativePG cluster status"]]],
+ ["Users & backup",[
+  ["CREATE ROLE <user> LOGIN PASSWORD '<password>';","Create a login role"],
+  ["GRANT CONNECT ON DATABASE <db> TO <user>; GRANT USAGE ON SCHEMA public TO <user>; GRANT SELECT ON ALL TABLES IN SCHEMA public TO <user>;","Read-only access"],
+  ["ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO <user>;","Also for future tables"],
+  ["pg_dump -h <host> -U <user> -Fc -d <db> -f <db>-$(date +%F).dump","Compressed backup"],
+  ["pg_dump -h <host> -U <user> -d <db> -t <table> --data-only -f <table>.sql","One table's data"],
+  ["pg_restore -h <host> -U <user> -d <db> -j 4 --no-owner <db>.dump","Parallel restore"],
+  ["pg_restore -l <db>.dump | head","List contents of a dump"],
+  ["pg_dumpall -h <host> -U postgres --globals-only > globals.sql","Roles and tablespaces"],
+  ["pg_basebackup -h <host> -U <repl-user> -D <dir> -Ft -z -P","Physical base backup"]]]
+]);
+
+C("mysql","MySQL / MariaDB","mysql","Data","Connect, processlist, sizes, replication, backup.",[
+ ["Everyday",[
+  ["mysql -h <host> -u <user> -p <db>","Connect"],
+  ["mysqladmin -h <host> -u <user> -p status","Uptime, threads, queries/sec"],
+  ["SHOW FULL PROCESSLIST;","Running queries"],
+  ["!KILL <id>;","Kill a connection/query"],
+  ["SHOW GLOBAL STATUS LIKE 'Threads_connected'; SHOW VARIABLES LIKE 'max_connections';","Connections vs max"],
+  ["SELECT table_schema, ROUND(SUM(data_length+index_length)/1024/1024) AS mb FROM information_schema.tables GROUP BY table_schema ORDER BY mb DESC;","Database sizes"],
+  ["SHOW ENGINE INNODB STATUS\\G","InnoDB internals, deadlocks"],
+  ["SHOW REPLICA STATUS\\G","Replication state (SHOW SLAVE STATUS on older)"],
+  ["mysqldump -h <host> -u <user> -p --single-transaction --routines --triggers <db> | gzip > <db>.sql.gz","Consistent backup"],
+  ["gunzip < <db>.sql.gz | mysql -h <host> -u <user> -p <db>","Restore"]]]
+]);
+
+C("mongo","MongoDB","mongosh","Data","Status, slow ops, sizes, replica sets, backup.",[
+ ["Everyday",[
+  ["mongosh \"mongodb://<user>@<host>:27017/<db>?authSource=admin\"","Connect"],
+  ["db.adminCommand({ ping: 1 })","Ping"],
+  ["rs.status().members.map(m => [m.name, m.stateStr, m.health])","Replica set members"],
+  ["db.currentOp({ secs_running: { $gt: 5 } })","Operations running > 5s"],
+  ["db.killOp(<opid>)","Kill an operation"],
+  ["db.stats(1024*1024)","Database size in MB"],
+  ["db.getCollectionNames().map(c => [c, db[c].estimatedDocumentCount()])","Collections and document counts"],
+  ["db.<collection>.getIndexes()","Indexes on a collection"],
+  ["db.<collection>.find({<field>: <value>}).explain('executionStats')","Query plan"],
+  ["db.serverStatus().connections","Connections in use"],
+  ["mongodump --uri \"<mongo-uri>\" --gzip --archive=<db>-$(date +%F).gz","Backup"],
+  ["mongorestore --uri \"<mongo-uri>\" --gzip --archive=<db>.gz","Restore"]]]
+]);
+
+C("redis","Redis","redis-cli","Data","Connectivity, memory, keys, slow commands, replication.",[
+ ["Connect & health",[
+  ["export REDISCLI_AUTH=<password>","Keep password out of history and ps"],
+  ["redis-cli -h <host> -p 6379 ping","Should answer PONG"],
+  ["redis-cli -h <host> --tls -p 6380 ping","Connect over TLS"],
+  ["redis-cli -h <host> info server | grep -E 'redis_version|uptime_in_days'","Version and uptime"],
+  ["redis-cli -h <host> info memory | grep -E 'used_memory_human|maxmemory_human|mem_fragmentation_ratio'","Memory, limit, fragmentation"],
+  ["redis-cli -h <host> info stats | grep -E 'keyspace_hits|keyspace_misses|evicted_keys|expired_keys'","Hits, misses, evictions"],
+  ["redis-cli -h <host> info keyspace","Keys per database"],
+  ["redis-cli -h <host> --latency","Latency sampling"],
+  ["redis-cli -h <host> --stat","Live stats every second"]]],
+ ["Keys",[
+  ["redis-cli -h <host> dbsize","Keys in current DB"],
+  ["redis-cli -h <host> --scan --pattern '<prefix>*' | head","Find keys safely (never KEYS * in prod)"],
+  ["redis-cli -h <host> --scan --pattern '<prefix>*' | wc -l","Count keys matching"],
+  ["redis-cli -h <host> --bigkeys","Largest keys per type"],
+  ["redis-cli -h <host> --memkeys","Keys using most memory"],
+  ["redis-cli -h <host> type <key> && redis-cli -h <host> ttl <key>","Type and TTL"],
+  ["redis-cli -h <host> memory usage <key>","Bytes used by a key"],
+  ["redis-cli -h <host> expire <key> 3600","Set a 1-hour TTL"],
+  ["!redis-cli -h <host> --scan --pattern '<prefix>*' | xargs -r -n 100 redis-cli -h <host> unlink","Delete keys matching a pattern"]]],
+ ["Troubleshoot",[
+  ["redis-cli -h <host> slowlog get 10","Recent slow commands"],
+  ["redis-cli -h <host> client list | wc -l","Connected clients"],
+  ["redis-cli -h <host> client list | awk '{print $2}' | cut -d= -f2 | cut -d: -f1 | sort | uniq -c | sort -rn","Clients per source IP"],
+  ["redis-cli -h <host> config get maxmemory-policy","Eviction policy"],
+  ["redis-cli -h <host> info persistence | grep -E 'rdb_last_bgsave_status|aof_enabled|rdb_last_save_time'","Persistence status"],
+  ["redis-cli -h <host> monitor","Every command live (heavy — seconds only)"],
+  ["!redis-cli -h <host> flushdb async","Empty the current database"]]],
+ ["Replication & cluster",[
+  ["redis-cli -h <host> info replication","Role, replicas, offset"],
+  ["redis-cli -h <sentinel> -p 26379 sentinel get-master-addr-by-name <master>","Current master from Sentinel"],
+  ["redis-cli -h <sentinel> -p 26379 sentinel replicas <master>","Replicas known to Sentinel"],
+  ["redis-cli -c -h <host> cluster info","Cluster state"],
+  ["redis-cli -c -h <host> cluster nodes","Cluster nodes and slots"],
+  ["redis-cli --cluster check <host>:6379","Verify slot coverage"]]]
+]);
+
+C("minio","MinIO","mc","Data","Buckets, objects, mirroring, policies, admin.",[
+ ["Setup & browse",[
+  ["mc alias set <alias> https://<minio-host>:9000 <access-key> <secret-key>","Register a server"],
+  ["mc alias list","Aliases"],
+  ["mc ready <alias>","Is the cluster ready"],
+  ["mc ls <alias>/<bucket>/<prefix>","List objects"],
+  ["mc ls --versions <alias>/<bucket>/<object>","Object versions"],
+  ["mc du --depth 1 <alias>/<bucket>","Size per prefix"],
+  ["mc stat <alias>/<bucket>/<object>","Object metadata"],
+  ["mc find <alias>/<bucket> --name '*.parquet' --older-than 30d","Find by name and age"],
+  ["mc cat <alias>/<bucket>/<object> | head","Print an object"]]],
+ ["Move data",[
+  ["mc mb <alias>/<bucket>","Create bucket"],
+  ["mc cp --recursive <dir> <alias>/<bucket>/<prefix>/","Upload a directory"],
+  ["mc mirror --overwrite <dir> <alias>/<bucket>/<prefix>","Sync local → bucket"],
+  ["mc mirror --watch <dir> <alias>/<bucket>","Continuous sync"],
+  ["mc mirror <alias1>/<bucket> <alias2>/<bucket>","Copy between servers"],
+  ["mc share download --expire 24h <alias>/<bucket>/<object>","Pre-signed link"],
+  ["mc undo <alias>/<bucket>/<object>","Undo last PUT/DELETE (versioned buckets)"],
+  ["!mc rm --recursive --force <alias>/<bucket>/<prefix>","Delete everything under a prefix"]]],
+ ["Policies & admin",[
+  ["mc admin info <alias>","Servers, drives, usage"],
+  ["mc admin heal <alias>","Heal status"],
+  ["mc anonymous set download <alias>/<bucket>","Public read"],
+  ["mc anonymous set none <alias>/<bucket>","Remove public access"],
+  ["mc ilm rule add --expire-days 30 <alias>/<bucket>","Expire after 30 days"],
+  ["mc version enable <alias>/<bucket>","Enable versioning"],
+  ["mc quota set <alias>/<bucket> --size 500GiB","Bucket quota"],
+  ["mc admin user add <alias> <user> <password>","Create user"],
+  ["mc admin policy attach <alias> readwrite --user <user>","Attach policy"],
+  ["mc admin user svcacct add <alias> <user>","Access key for an app"],
+  ["mc replicate ls <alias>/<bucket>","Replication rules"],
+  ["mc admin trace -v <alias>","Live API trace"]]]
+]);
+
+C("kafka","Kafka","kafka","Data","Topics, consumer lag, configs, produce/consume.",[
+ ["Topics",[
+  ["kafka-topics.sh --bootstrap-server <broker>:9092 --list","List topics"],
+  ["kafka-topics.sh --bootstrap-server <broker>:9092 --describe --topic <topic>","Partitions, leaders, ISR"],
+  ["kafka-topics.sh --bootstrap-server <broker>:9092 --describe --under-replicated-partitions","Under-replicated partitions"],
+  ["kafka-topics.sh --bootstrap-server <broker>:9092 --create --topic <topic> --partitions 6 --replication-factor 3","Create a topic"],
+  ["kafka-topics.sh --bootstrap-server <broker>:9092 --alter --topic <topic> --partitions 12","Add partitions (cannot reduce)"],
+  ["kafka-configs.sh --bootstrap-server <broker>:9092 --entity-type topics --entity-name <topic> --alter --add-config retention.ms=86400000","Set retention to 1 day"],
+  ["kafka-configs.sh --bootstrap-server <broker>:9092 --entity-type topics --entity-name <topic> --describe","Topic overrides"],
+  ["kafka-log-dirs.sh --bootstrap-server <broker>:9092 --describe --topic-list <topic>","Disk size per partition"]]],
+ ["Consumers",[
+  ["kafka-consumer-groups.sh --bootstrap-server <broker>:9092 --list","Consumer groups"],
+  ["kafka-consumer-groups.sh --bootstrap-server <broker>:9092 --describe --group <group>","Lag per partition"],
+  ["kafka-consumer-groups.sh --bootstrap-server <broker>:9092 --describe --group <group> --members","Group members and assignments"],
+  ["kafka-consumer-groups.sh --bootstrap-server <broker>:9092 --group <group> --reset-offsets --to-datetime <YYYY-MM-DDTHH:mm:SS.000> --topic <topic> --dry-run","Preview reset to a time"],
+  ["kafka-consumer-groups.sh --bootstrap-server <broker>:9092 --group <group> --reset-offsets --to-latest --topic <topic> --execute","Skip to latest (group stopped)"]]],
+ ["Messages",[
+  ["kafka-console-consumer.sh --bootstrap-server <broker>:9092 --topic <topic> --from-beginning --max-messages 10 --property print.key=true","Peek with keys"],
+  ["kafka-console-producer.sh --bootstrap-server <broker>:9092 --topic <topic>","Send test messages"],
+  ["kcat -b <broker>:9092 -t <topic> -C -o -10 -e","Last 10 messages per partition (kcat)"],
+  ["kcat -b <broker>:9092 -L","Cluster metadata (kcat)"],
+  ["kubectl get kafka,kafkatopic,kafkauser -n <ns>","Strimzi resources"]]]
+]);
+
+C("rabbitmq","RabbitMQ","rabbitmqctl","Data","Queues, consumers, cluster health.",[
+ ["Everyday",[
+  ["rabbitmq-diagnostics status","Node status, memory, alarms"],
+  ["rabbitmq-diagnostics check_running && rabbitmq-diagnostics check_local_alarms","Health checks"],
+  ["rabbitmqctl cluster_status","Cluster members and partitions"],
+  ["rabbitmqctl list_queues -p <vhost> name messages messages_unacknowledged consumers","Queue depth and consumers"],
+  ["rabbitmqctl list_queues name messages | sort -k2 -n -r | head","Deepest queues"],
+  ["rabbitmqctl list_connections user peer_host state","Connections"],
+  ["rabbitmqctl list_consumers -p <vhost>","Consumers"],
+  ["rabbitmq-plugins list -e","Enabled plugins"],
+  ["!rabbitmqctl purge_queue <queue> -p <vhost>","Delete all messages in a queue"],
+  ["curl -su <user>:<password> http://<host>:15672/api/overview | jq '.queue_totals'","Totals via management API"]]]
+]);
+
+C("etcd","etcd","etcdctl","Data","Health, members, snapshots (Kubernetes control plane).",[
+ ["Everyday",[
+  ["export ETCDCTL_API=3 ETCDCTL_ENDPOINTS=https://127.0.0.1:2379 ETCDCTL_CACERT=/etc/kubernetes/pki/etcd/ca.crt ETCDCTL_CERT=/etc/kubernetes/pki/etcd/server.crt ETCDCTL_KEY=/etc/kubernetes/pki/etcd/server.key","kubeadm cert paths"],
+  ["etcdctl endpoint health --cluster","Health of every member"],
+  ["etcdctl endpoint status --cluster -w table","Leader, DB size, raft index"],
+  ["etcdctl member list -w table","Members"],
+  ["etcdctl snapshot save /backup/etcd-$(date +%F).db","Snapshot backup"],
+  ["etcdutl snapshot status /backup/etcd-<date>.db -w table","Verify a snapshot"],
+  ["etcdctl alarm list","Alarms (e.g. NOSPACE)"],
+  ["etcdctl defrag --cluster","Defragment to reclaim space"]]]
+]);
+
+C("nexus","Nexus","nexus","Artifacts & security","Repository Manager REST API, cleanup and clients.",[
+ ["REST API",[
+  ["export NEXUS=https://<nexus-host> NEXUS_AUTH=<user>:<password>","Set once per shell"],
+  ["curl -s $NEXUS/service/rest/v1/status/check -u $NEXUS_AUTH | jq","Health checks"],
+  ["curl -s -o /dev/null -w '%{http_code}\\n' $NEXUS/service/rest/v1/status/writable","Can accept writes (200)?"],
+  ["curl -s $NEXUS/service/rest/v1/repositories -u $NEXUS_AUTH | jq -r '.[] | [.name,.format,.type] | @tsv'","List repositories"],
+  ["curl -s \"$NEXUS/service/rest/v1/search?repository=<repo>&name=<name>\" -u $NEXUS_AUTH | jq '.items[] | {name,version}'","Search components"],
+  ["curl -s \"$NEXUS/service/rest/v1/search/assets?repository=<repo>&sort=version&direction=desc\" -u $NEXUS_AUTH | jq -r '.items[0].downloadUrl'","Latest asset's download URL"],
+  ["curl -s $NEXUS/service/rest/v1/blobstores -u $NEXUS_AUTH | jq '.[] | {name, totalSizeInBytes, availableSpaceInBytes}'","Blob store usage"],
+  ["curl -u $NEXUS_AUTH --upload-file <file> $NEXUS/repository/<raw-repo>/<path>/<file>","Upload to a raw repo"],
+  ["curl -u $NEXUS_AUTH -O $NEXUS/repository/<raw-repo>/<path>/<file>","Download from a raw repo"],
+  ["curl -s $NEXUS/service/rest/v1/tasks -u $NEXUS_AUTH | jq -r '.items[] | [.name,.currentState,.lastRunResult] | @tsv'","Scheduled tasks and last result"],
+  ["curl -X POST -u $NEXUS_AUTH $NEXUS/service/rest/v1/tasks/<task-id>/run","Run a task now (e.g. compact blob store)"],
+  ["!curl -X DELETE -u $NEXUS_AUTH $NEXUS/service/rest/v1/components/<component-id>","Delete a component"]]],
+ ["Clients",[
+  ["docker login <nexus-host>:<docker-port>","Docker login to a Nexus Docker repo"],
+  ["docker pull <nexus-host>:<docker-port>/<image>:<tag>","Pull through a Docker proxy/group"],
+  ["npm config set registry $NEXUS/repository/<npm-group>/","npm via Nexus"],
+  ["pip config set global.index-url $NEXUS/repository/<pypi-group>/simple","pip via Nexus"],
+  ["mvn deploy -DaltDeploymentRepository=nexus::$NEXUS/repository/<maven-releases>/","Deploy a Maven artifact"],
+  ["helm repo add nexus $NEXUS/repository/<helm-repo>/ --username <user> --password <password>","Helm repo via Nexus"],
+  ["curl -u $NEXUS_AUTH $NEXUS/repository/<helm-repo>/ --upload-file <chart>-<ver>.tgz","Upload a Helm chart"],
+  ["go env -w GOPROXY=$NEXUS/repository/<go-proxy>/","Go modules via Nexus"]]],
+ ["Server",[
+  ["tail -f <sonatype-work>/nexus3/log/nexus.log","Server log"],
+  ["tail -f <sonatype-work>/nexus3/log/request.log","Request log"],
+  ["cat <sonatype-work>/nexus3/admin.password","Initial admin password"],
+  ["du -sh <sonatype-work>/nexus3/blobs/*","Blob store sizes on disk"]]]
+]);
+
+C("harbor","Harbor","harbor","Artifacts & security","Registry projects, artifacts and scans via API.",[
+ ["API",[
+  ["curl -su <user>:<password> https://<harbor>/api/v2.0/health | jq","Component health"],
+  ["curl -su <user>:<password> 'https://<harbor>/api/v2.0/projects?page_size=100' | jq -r '.[].name'","Projects"],
+  ["curl -su <user>:<password> 'https://<harbor>/api/v2.0/projects/<project>/repositories?page_size=100' | jq -r '.[].name'","Repositories in a project"],
+  ["curl -su <user>:<password> 'https://<harbor>/api/v2.0/projects/<project>/repositories/<repo>/artifacts?with_scan_overview=true' | jq '.[] | {digest, tags: [.tags[]?.name]}'","Artifacts and tags"],
+  ["curl -su <user>:<password> -X POST https://<harbor>/api/v2.0/projects/<project>/repositories/<repo>/artifacts/<tag>/scan","Trigger a vulnerability scan"]]]
+]);
+
+C("vault","Vault","vault","Artifacts & security","Status, login, KV secrets, tokens, PKI.",[
+ ["Everyday",[
+  ["export VAULT_ADDR=https://<vault-host>:8200","Point the CLI at Vault"],
+  ["vault status","Sealed/unsealed, HA"],
+  ["vault login -method=oidc","SSO login (or -method=ldap username=<user>)"],
+  ["vault token lookup","Your token's policies and TTL"],
+  ["vault token renew","Extend your token"],
+  ["vault secrets list -detailed","Secret engines"],
+  ["vault kv list <mount>/<path>","Keys under a path"],
+  ["vault kv get <mount>/<path>","Read a secret"],
+  ["vault kv get -field=<key> <mount>/<path>","One field (scripts)"],
+  ["vault kv get -format=json <mount>/<path> | jq .data.data","Secret as JSON"],
+  ["vault kv put <mount>/<path> <key>=<value>","Write new version"],
+  ["vault kv patch <mount>/<path> <key>=<value>","Update one key, keep the others"],
+  ["vault kv metadata get <mount>/<path>","Version history"],
+  ["vault kv rollback -version=<n> <mount>/<path>","Restore an older version"]]],
+ ["Admin",[
+  ["vault operator raft list-peers","Raft cluster peers"],
+  ["vault operator unseal","Unseal (repeat with key shares)"],
+  ["vault auth list","Auth methods"],
+  ["vault policy read <policy>","Policy contents"],
+  ["vault token capabilities <mount>/<path>","What your token can do on a path"],
+  ["vault write <pki-mount>/issue/<role> common_name=<host> ttl=720h","Issue a certificate from PKI"],
+  ["vault operator raft snapshot save vault-$(date +%F).snap","Snapshot backup"],
+  ["vault audit list","Audit devices"]]]
+]);
+
+C("security","Security scanning","trivy","Artifacts & security","Image, IaC, secret and cluster scanning; signing.",[
+ ["Trivy",[
+  ["trivy image --severity HIGH,CRITICAL <image>","Image vulnerabilities, high/critical only"],
+  ["trivy image --ignore-unfixed --exit-code 1 --severity CRITICAL <image>","Fail CI on fixable criticals"],
+  ["trivy fs --scanners vuln,secret,misconfig .","Scan a repo for deps, secrets, misconfig"],
+  ["trivy config .","Scan Terraform/K8s/Dockerfiles"],
+  ["trivy k8s --report summary cluster","Scan the current cluster"],
+  ["trivy image --format cyclonedx -o sbom.json <image>","Generate an SBOM"]]],
+ ["Supply chain & secrets",[
+  ["syft <image> -o spdx-json > sbom.spdx.json","SBOM with Syft"],
+  ["grype <image> --only-fixed","Vulnerabilities with fixes available"],
+  ["cosign sign --key cosign.key <registry>/<repo>@sha256:<digest>","Sign an image"],
+  ["cosign verify --key cosign.pub <registry>/<repo>:<tag>","Verify a signature"],
+  ["gitleaks detect --source . -v","Find secrets in Git history"],
+  ["hadolint Dockerfile","Lint a Dockerfile"],
+  ["kube-bench run --targets node","CIS checks on a node"],
+  ["kubescape scan framework nsa","Kubernetes posture scan"]]],
+ ["Host checks",[
+  ["sudo lynis audit system","Host hardening audit"],
+  ["sudo ss -tulpn | grep -v 127.0.0.1","Services exposed beyond localhost"],
+  ["sudo grep -E 'Failed password|Invalid user' /var/log/auth.log | tail","Recent SSH brute-force attempts"],
+  ["sudo fail2ban-client status sshd","Banned IPs (fail2ban)"],
+  ["sudo find / -xdev -perm -4000 -type f 2>/dev/null","SUID binaries"]]]
+]);
+
+C("nginx","Nginx","nginx","Artifacts & security","Config test, reload, logs, quick analysis.",[
+ ["Everyday",[
+  ["sudo nginx -t","Test configuration"],
+  ["sudo nginx -T | less","Dump the full effective config"],
+  ["sudo systemctl reload nginx","Reload without dropping connections"],
+  ["sudo tail -f /var/log/nginx/access.log /var/log/nginx/error.log","Follow access and error logs"],
+  ["awk '{print $9}' /var/log/nginx/access.log | sort | uniq -c | sort -rn","Requests by status code"],
+  ["awk '$9 ~ /^5/ {print $7}' /var/log/nginx/access.log | sort | uniq -c | sort -rn | head","URLs returning 5xx"],
+  ["awk '{print $1}' /var/log/nginx/access.log | sort | uniq -c | sort -rn | head","Top client IPs"],
+  ["curl -s http://127.0.0.1/nginx_status","stub_status counters (if enabled)"],
+  ["kubectl logs -n ingress-nginx deploy/ingress-nginx-controller --tail=100","Ingress-NGINX controller logs"],
+  ["kubectl exec -n ingress-nginx deploy/ingress-nginx-controller -- cat /etc/nginx/nginx.conf | grep -A5 <host>","Generated config for a host"]]]
+]);
+
+C("gpu","GPU & CUDA","nvidia-smi","MLOps","GPU health, drivers, containers and Kubernetes GPUs.",[
+ ["Host",[
+  ["nvidia-smi","GPUs, memory, utilisation, processes"],
+  ["nvidia-smi -L","List GPUs with UUIDs"],
+  ["watch -n 1 nvidia-smi","Refresh every second"],
+  ["nvidia-smi --query-gpu=index,name,utilization.gpu,memory.used,memory.total,temperature.gpu,power.draw --format=csv","Metrics as CSV"],
+  ["nvidia-smi --query-compute-apps=pid,process_name,used_memory --format=csv","Which processes use GPU memory"],
+  ["nvidia-smi dmon -s pucm","Streaming power/util/clock/memory stats"],
+  ["nvidia-smi topo -m","GPU interconnect topology (NVLink/PCIe)"],
+  ["nvidia-smi -q -d ECC,TEMPERATURE,PERFORMANCE | less","ECC errors, temps, throttling reasons"],
+  ["nvcc --version","CUDA toolkit version"],
+  ["cat /proc/driver/nvidia/version","Driver version"],
+  ["nvtop","Interactive GPU top (if installed)"]]],
+ ["Frameworks",[
+  ["python -c \"import torch; print(torch.__version__, torch.version.cuda, torch.cuda.is_available(), torch.cuda.device_count())\"","PyTorch sees the GPUs?"],
+  ["python -c \"import torch; print(torch.cuda.get_device_name(0), torch.cuda.memory_allocated()/1e9, 'GB')\"","Device name and allocated memory"],
+  ["python -c \"import tensorflow as tf; print(tf.config.list_physical_devices('GPU'))\"","TensorFlow sees the GPUs?"],
+  ["CUDA_VISIBLE_DEVICES=0,1 python <script>.py","Restrict a job to specific GPUs"],
+  ["torchrun --nproc_per_node=<gpus> <script>.py","Multi-GPU training on one node"]]],
+ ["Containers & Kubernetes",[
+  ["docker run --rm --gpus all nvidia/cuda:12.4.1-base-ubuntu22.04 nvidia-smi","GPU visible inside Docker?"],
+  ["sudo nvidia-ctk runtime configure --runtime=docker && sudo systemctl restart docker","Configure NVIDIA Container Toolkit"],
+  ["kubectl get nodes -o custom-columns=NAME:.metadata.name,GPU:.status.allocatable.nvidia\\.com/gpu","Allocatable GPUs per node"],
+  ["kubectl describe nodes | grep -E 'Name:|nvidia.com/gpu'","GPU capacity and requests"],
+  ["kubectl get pods -n gpu-operator","NVIDIA GPU Operator components"],
+  ["kubectl logs -n gpu-operator -l app=nvidia-device-plugin-daemonset --tail=50","Device plugin logs"],
+  ["kubectl run gpu-test --rm -it --restart=Never --image=nvidia/cuda:12.4.1-base-ubuntu22.04 --overrides='{\"spec\":{\"containers\":[{\"name\":\"gpu-test\",\"image\":\"nvidia/cuda:12.4.1-base-ubuntu22.04\",\"command\":[\"nvidia-smi\"],\"resources\":{\"limits\":{\"nvidia.com/gpu\":1}}}]}}'","Test pod that requests one GPU"]]]
+]);
+
+C("pyenv","Python envs & notebooks","python","MLOps","venv, uv, pip, conda, Jupyter, papermill.",[
+ ["venv & pip",[
+  ["python3 -m venv .venv && source .venv/bin/activate","Create and activate a virtualenv"],
+  ["pip install -r requirements.txt","Install dependencies"],
+  ["pip freeze > requirements.txt","Pin current environment"],
+  ["pip list --outdated","Outdated packages"],
+  ["pip show <package>","Version and location of a package"],
+  ["pip-audit","Known vulnerabilities in dependencies"],
+  ["python -m pip cache purge","Clear pip cache"]]],
+ ["uv",[
+  ["uv venv && source .venv/bin/activate","Fast virtualenv"],
+  ["uv pip install -r requirements.txt","Fast install"],
+  ["uv add <package>","Add a dependency to pyproject"],
+  ["uv sync","Install exactly what the lockfile says"],
+  ["uv run <script>.py","Run inside the project environment"],
+  ["uv python install 3.12","Install a Python version"]]],
+ ["conda",[
+  ["conda create -n <env> python=3.11 -y","Create an environment"],
+  ["conda activate <env>","Activate"],
+  ["conda env list","Environments"],
+  ["conda env export --no-builds > environment.yml","Export"],
+  ["conda env create -f environment.yml","Recreate from file"],
+  ["conda clean -a -y","Free disk from caches"]]],
+ ["Jupyter",[
+  ["jupyter lab --no-browser --ip 0.0.0.0 --port 8888","Remote Jupyter Lab"],
+  ["jupyter server list","Running servers and tokens"],
+  ["python -m ipykernel install --user --name <env> --display-name \"<env>\"","Register an env as a kernel"],
+  ["jupyter kernelspec list","Installed kernels"],
+  ["jupyter nbconvert --to script <notebook>.ipynb","Notebook → .py"],
+  ["papermill <in>.ipynb <out>.ipynb -p <param> <value>","Run a notebook with parameters"],
+  ["nbstripout --install","Strip outputs on git commit"]]]
+]);
+
+C("mlflow","MLflow","mlflow","MLOps","Tracking server, runs, registry, serving.",[
+ ["Server",[
+  ["mlflow server --host 0.0.0.0 --port 5000 --backend-store-uri postgresql://<user>@<host>/<db> --artifacts-destination s3://<bucket>","Tracking server with Postgres + S3/MinIO"],
+  ["export MLFLOW_TRACKING_URI=http://<mlflow-host>:5000","Point clients at the server"],
+  ["export MLFLOW_S3_ENDPOINT_URL=https://<minio-host>:9000 AWS_ACCESS_KEY_ID=<key> AWS_SECRET_ACCESS_KEY=<secret>","Use MinIO for artifacts"],
+  ["mlflow db upgrade postgresql://<user>@<host>/<db>","Migrate DB schema after upgrading MLflow"],
+  ["mlflow gc --backend-store-uri postgresql://<user>@<host>/<db>","Permanently remove deleted runs"],
+  ["curl -s http://<mlflow-host>:5000/health","Health check"]]],
+ ["Runs & models",[
+  ["mlflow experiments search","Experiments"],
+  ["mlflow runs list --experiment-id <id>","Runs in an experiment"],
+  ["mlflow runs describe --run-id <run-id>","Params, metrics, tags of a run"],
+  ["mlflow artifacts download --run-id <run-id> --artifact-path <path> --dst-path <dir>","Download run artifacts"],
+  ["mlflow run . -P <param>=<value>","Run an MLproject"],
+  ["mlflow models serve -m \"models:/<model-name>/<version>\" -p 5001 --env-manager local","Serve a registered model"],
+  ["mlflow models serve -m \"models:/<model-name>@<alias>\" -p 5001","Serve by alias (e.g. @champion)"],
+  ["mlflow models build-docker -m \"models:/<model-name>/<version>\" -n <image>:<tag>","Build a serving image"],
+  ["curl -s http://localhost:5001/invocations -H 'Content-Type: application/json' -d '{\"inputs\": [[1.0, 2.0, 3.0]]}'","Test a served model"]]]
+]);
+
+C("dvc","DVC","dvc","MLOps","Data and pipeline versioning.",[
+ ["Data",[
+  ["dvc init","Initialise in a Git repo"],
+  ["dvc remote add -d storage s3://<bucket>/dvc","Default remote"],
+  ["dvc remote modify storage endpointurl https://<minio-host>:9000","Use MinIO as remote"],
+  ["dvc add <data-dir> && git add <data-dir>.dvc .gitignore","Track a dataset"],
+  ["dvc push","Upload data"],
+  ["dvc pull","Download data for current commit"],
+  ["dvc status -c","Local vs remote differences"],
+  ["dvc checkout","Sync workspace data to current commit"],
+  ["!dvc gc -w -c","Delete data not used by workspace, locally and in remote"]]],
+ ["Pipelines & experiments",[
+  ["dvc repro","Re-run changed stages"],
+  ["dvc dag","Pipeline graph"],
+  ["dvc exp run -S train.lr=0.01","Experiment with a parameter override"],
+  ["dvc exp show --only-changed","Compare experiments"],
+  ["dvc exp apply <exp-name>","Bring an experiment into the workspace"],
+  ["dvc metrics diff main","Metric changes vs main"],
+  ["dvc plots diff main","Plot changes vs main"]]]
+]);
+
+C("airflow","Airflow","airflow","MLOps","DAGs, runs, tasks, health (Airflow 2.x CLI).",[
+ ["DAGs",[
+  ["airflow dags list","All DAGs"],
+  ["airflow dags list-import-errors","DAGs that failed to parse"],
+  ["airflow dags trigger <dag-id> --conf '{\"<key>\": \"<value>\"}'","Trigger a run with config"],
+  ["airflow dags pause <dag-id>","Pause (unpause to resume)"],
+  ["airflow dags list-runs -d <dag-id> --state failed","Failed runs"],
+  ["airflow dags next-execution <dag-id>","Next scheduled run"],
+  ["airflow dags backfill <dag-id> -s <start-date> -e <end-date>","Backfill a date range (Airflow 3: airflow backfill create)"]]],
+ ["Tasks",[
+  ["airflow tasks list <dag-id> --tree","Tasks as a tree"],
+  ["airflow tasks test <dag-id> <task-id> <date>","Run one task locally without recording state"],
+  ["airflow tasks clear <dag-id> -t '<task-regex>' -s <start-date> -e <end-date> -y","Clear tasks so they re-run"],
+  ["airflow tasks state <dag-id> <task-id> <date>","State of a task instance"]]],
+ ["Health & config",[
+  ["airflow db check","Metadata DB reachable"],
+  ["airflow jobs check --job-type SchedulerJob","Scheduler heartbeat"],
+  ["curl -s http://<airflow-host>:8080/health | jq","Webserver health JSON"],
+  ["airflow connections list -o table","Connections"],
+  ["airflow variables get <key>","Read a Variable"],
+  ["airflow pools list","Pools and slots"],
+  ["airflow config get-value core executor","Executor in use"],
+  ["kubectl logs -n <ns> deploy/airflow-scheduler --tail=100","Scheduler logs on Kubernetes"]]]
+]);
+
+C("kserve","Kubeflow & KServe","kserve","MLOps","Notebooks, training jobs, pipelines, model serving.",[
+ ["Kubeflow",[
+  ["kubectl get profiles","Kubeflow user profiles (namespaces)"],
+  ["kubectl get notebooks -A","Notebook servers"],
+  ["kubectl get pytorchjobs,tfjobs -n <ns>","Distributed training jobs"],
+  ["kubectl describe pytorchjob <job> -n <ns>","Job status and events"],
+  ["kubectl logs -n <ns> <job>-master-0 -f","Follow master replica logs"],
+  ["kubectl get experiments,trials -n <ns>","Katib hyperparameter tuning"],
+  ["kubectl get workflows -n kubeflow","Pipeline runs (Argo backend)"],
+  ["kubectl port-forward -n kubeflow svc/ml-pipeline-ui 8080:80","Pipelines UI locally"]]],
+ ["KServe",[
+  ["kubectl get isvc -n <ns>","InferenceServices, URL, readiness"],
+  ["kubectl describe isvc <name> -n <ns>","Conditions and events"],
+  ["kubectl get pods -n <ns> -l serving.kserve.io/inferenceservice=<name>","Pods behind a model"],
+  ["kubectl logs -n <ns> -l serving.kserve.io/inferenceservice=<name> -c kserve-container --tail=100","Model server logs"],
+  ["curl -s -H \"Host: <name>.<ns>.<domain>\" http://<ingress-ip>/v1/models/<name>:predict -d @input.json","Predict (v1 protocol)"],
+  ["curl -s -H \"Host: <name>.<ns>.<domain>\" http://<ingress-ip>/v2/models/<name>/infer -d @input.json","Infer (v2 / Open Inference protocol)"],
+  ["kubectl patch isvc <name> -n <ns> --type merge -p '{\"spec\":{\"predictor\":{\"canaryTrafficPercent\":10}}}'","Send 10% to the new revision"]]],
+ ["Triton",[
+  ["curl -s <triton-host>:8000/v2/health/ready -o /dev/null -w '%{http_code}\\n'","Ready (200)?"],
+  ["curl -s <triton-host>:8000/v2/models/<model> | jq","Model metadata"],
+  ["curl -s -X POST <triton-host>:8000/v2/repository/index | jq","Models in the repository and state"],
+  ["curl -s <triton-host>:8002/metrics | grep nv_inference_request_success","Inference counters"]]]
+]);
+
+C("llm","LLM serving","llm","MLOps","Ollama, vLLM, llama.cpp, Hugging Face.",[
+ ["Ollama",[
+  ["ollama pull <model>","Download a model"],
+  ["ollama run <model>","Chat in the terminal"],
+  ["ollama list","Downloaded models"],
+  ["ollama ps","Loaded models and GPU/CPU split"],
+  ["curl -s http://localhost:11434/api/generate -d '{\"model\":\"<model>\",\"prompt\":\"Hello\",\"stream\":false}' | jq -r .response","Generate via API"],
+  ["OLLAMA_HOST=0.0.0.0 ollama serve","Serve on all interfaces"],
+  ["ollama rm <model>","Remove a model"]]],
+ ["vLLM",[
+  ["vllm serve <hf-model-id> --tensor-parallel-size <gpus> --max-model-len 8192 --gpu-memory-utilization 0.9","OpenAI-compatible server"],
+  ["curl -s http://localhost:8000/v1/models | jq","Models being served"],
+  ["curl -s http://localhost:8000/v1/chat/completions -H 'Content-Type: application/json' -d '{\"model\":\"<hf-model-id>\",\"messages\":[{\"role\":\"user\",\"content\":\"Hello\"}]}' | jq -r '.choices[0].message.content'","Chat completion"],
+  ["curl -s http://localhost:8000/metrics | grep -E 'vllm:num_requests_(running|waiting)'","Running vs queued requests"],
+  ["docker run --gpus all -p 8000:8000 -v ~/.cache/huggingface:/root/.cache/huggingface vllm/vllm-openai --model <hf-model-id>","Run vLLM in Docker"]]],
+ ["llama.cpp & Hugging Face",[
+  ["llama-server -m <model>.gguf -c 4096 -ngl 99 --port 8080","Serve a GGUF model on GPU"],
+  ["hf auth login","Log in to Hugging Face (older CLI: huggingface-cli login)"],
+  ["hf download <repo-id> --local-dir <dir>","Download a model"],
+  ["hf download <repo-id> --include '*.safetensors' '*.json' --local-dir <dir>","Download only some files"],
+  ["export HF_HOME=<dir>","Move the model cache (e.g. to a big disk)"],
+  ["du -sh ~/.cache/huggingface/hub/*","Cache size per model"]]]
+]);
+
+C("ray","Ray","ray","MLOps","Clusters, jobs, dashboard, KubeRay.",[
+ ["Everyday",[
+  ["ray start --head --dashboard-host 0.0.0.0","Start a head node"],
+  ["ray start --address=<head-ip>:6379","Join a worker"],
+  ["ray status","Nodes and resource usage"],
+  ["ray job submit --address http://<head-ip>:8265 --working-dir . -- python <script>.py","Submit a job"],
+  ["ray job list --address http://<head-ip>:8265","Jobs"],
+  ["ray job logs <job-id> --address http://<head-ip>:8265 --follow","Follow job logs"],
+  ["ray job stop <job-id> --address http://<head-ip>:8265","Stop a job"],
+  ["ray stop","Stop Ray on this node"],
+  ["kubectl get rayclusters,rayjobs,rayservices -n <ns>","KubeRay resources"],
+  ["kubectl port-forward svc/<raycluster>-head-svc 8265:8265 -n <ns>","Dashboard locally"]]]
+]);
+
+R("morning","Morning health check","Daily","Five-minute sweep before the day starts.",[
+ ["kubectl get nodes","All nodes Ready?"],
+ ["kubectl get pods -A | grep -v -E 'Running|Completed'","Anything crashing, pending or evicted"],
+ ["kubectl get events -A --field-selector type=Warning --sort-by=.lastTimestamp | tail -20","Warnings from the night"],
+ ["curl -s http://<prometheus>:9090/api/v1/alerts | jq -r '.data.alerts[] | select(.state==\"firing\") | .labels.alertname' | sort | uniq -c","Firing alerts"],
+ ["kubectl top nodes","Any node near CPU/memory limits"],
+ ["df -hT | awk 'NR==1 || $6+0 > 80'","Filesystems over 80% on key hosts"],
+ ["velero backup get | head","Last night's backups completed?"],
+ ["helm list -A --failed --pending","Releases left in a bad state"],
+ ["argocd app list | grep -v -E 'Synced.*Healthy'","GitOps apps out of sync or degraded"],
+ ["echo | openssl s_client -connect <host>:443 -servername <host> 2>/dev/null | openssl x509 -noout -enddate","Certificates close to expiry"]
+]);
+
+R("crashloop","Pod in CrashLoopBackOff","Kubernetes","A container keeps starting and dying.",[
+ ["kubectl get pod <pod> -n <ns> -o wide","Confirm restarts count and node"],
+ ["kubectl describe pod <pod> -n <ns> | sed -n '/State:/,/Ready:/p;/Events:/,$p'","Last state, exit code, reason, events"],
+ ["kubectl logs <pod> -n <ns> -c <container> --previous","Logs of the run that crashed — usually the answer"],
+ ["","Exit code 137 + OOMKilled → raise memory limit or fix leak. 1/2 → app error (config, missing env/secret). 127 → command not found in image."],
+ ["kubectl get pod <pod> -n <ns> -o jsonpath='{.spec.containers[*].env}' | jq","Check env vars / secret references"],
+ ["kubectl get events -n <ns> --field-selector involvedObject.name=<pod>","Probe failures? (Liveness probe failed → probe too strict or app slow to start)"],
+ ["kubectl debug -it <pod> -n <ns> --copy-to=<pod>-debug --container=<container> -- sh","Start a copy with a shell to inspect the filesystem"],
+ ["kubectl rollout undo deploy/<name> -n <ns>","If it started after a deploy: roll back first, investigate after"]
+]);
+
+R("pending","Pod stuck in Pending","Kubernetes","Pod never gets scheduled.",[
+ ["kubectl describe pod <pod> -n <ns> | tail -20","Read the FailedScheduling message"],
+ ["","'Insufficient cpu/memory' → requests too big or cluster full. 'didn't match node affinity/selector' → labels. 'had taint' → tolerations. 'unbound PersistentVolumeClaims' → storage."],
+ ["kubectl describe nodes | grep -A8 'Allocated resources'","How much is already requested per node"],
+ ["kubectl get pvc -n <ns>","Is the PVC Bound?"],
+ ["kubectl describe pvc <pvc> -n <ns>","Provisioning errors from the storage class"],
+ ["kubectl get nodes -o custom-columns=NAME:.metadata.name,TAINTS:.spec.taints","Node taints"],
+ ["kubectl get resourcequota -n <ns>","Namespace quota exhausted?"],
+ ["kubectl get pods -n kube-system | grep -i autoscaler","Is cluster-autoscaler running and adding nodes?"]
+]);
+
+R("imagepull","ImagePullBackOff / ErrImagePull","Kubernetes","Kubelet cannot pull the image.",[
+ ["kubectl describe pod <pod> -n <ns> | grep -A5 -i 'failed'","Exact pull error"],
+ ["","'not found / manifest unknown' → wrong tag. 'unauthorized' → pull secret. 'i/o timeout / x509' → network, proxy or registry CA."],
+ ["kubectl get pod <pod> -n <ns> -o jsonpath='{.spec.containers[*].image}'","Image reference being used"],
+ ["docker manifest inspect <image>","Does that tag exist? (from a machine with registry access)"],
+ ["kubectl get pod <pod> -n <ns> -o jsonpath='{.spec.imagePullSecrets}'","Pull secret attached?"],
+ ["kubectl get secret <secret> -n <ns> -o jsonpath='{.data.\\.dockerconfigjson}' | base64 -d | jq '.auths | keys'","Which registries the secret covers"],
+ ["kubectl debug node/<node> -it --image=busybox -- chroot /host crictl pull <image>","Try the pull directly on the node"]
+]);
+
+R("notready","Node NotReady","Kubernetes","A node dropped out of the cluster.",[
+ ["kubectl describe node <node> | sed -n '/Conditions:/,/Addresses:/p'","MemoryPressure, DiskPressure, PIDPressure, Ready reason"],
+ ["kubectl get pods -A -o wide --field-selector spec.nodeName=<node>","What is affected"],
+ ["ssh <user>@<node> 'systemctl status kubelet containerd --no-pager'","Kubelet and runtime running?"],
+ ["ssh <user>@<node> 'journalctl -u kubelet --since \"30 min ago\" --no-pager | tail -50'","Kubelet errors (certs, runtime, PLEG)"],
+ ["ssh <user>@<node> 'df -h / /var/lib && free -h'","Disk or memory exhaustion"],
+ ["kubectl cordon <node>","Stop new pods landing there"],
+ ["kubectl drain <node> --ignore-daemonsets --delete-emptydir-data","Move workloads off, then fix or replace the node"]
+]);
+
+R("rollback","Bad deploy — roll back now","Kubernetes","Errors spiked right after a release.",[
+ ["kubectl rollout history deploy/<name> -n <ns>","Find the last good revision"],
+ ["kubectl rollout undo deploy/<name> -n <ns>","Roll back a plain deployment"],
+ ["helm history <release> -n <ns> && helm rollback <release> <revision> -n <ns> --wait","…or roll back a Helm release"],
+ ["argocd app set <app> --sync-policy none && argocd app rollback <app> <history-id>","…or roll back an Argo CD app (then revert in Git)"],
+ ["kubectl rollout status deploy/<name> -n <ns>","Wait for it to finish"],
+ ["kubectl logs -n <ns> -l app=<app> --since=5m | grep -ci error","Error rate back to normal?"],
+ ["","Afterwards: revert the change in Git so the next sync does not redeploy it."]
+]);
+
+R("diskfull","Disk full on a Linux host","Linux","'No space left on device' or disk alerts.",[
+ ["df -hT && df -i","Which filesystem — and is it space or inodes?"],
+ ["sudo du -xh --max-depth=1 / 2>/dev/null | sort -h | tail -15","Biggest top-level directories"],
+ ["sudo du -xh --max-depth=2 /var 2>/dev/null | sort -h | tail -15","Usual suspects under /var"],
+ ["sudo lsof +L1","Deleted files still held open (restart that process to free space)"],
+ ["sudo journalctl --vacuum-size=500M","Shrink the systemd journal"],
+ ["docker system df && docker system prune -f","Docker images/containers (if a container host)"],
+ ["sudo find /var/log -type f -name '*.gz' -mtime +14 -delete","Old rotated logs"],
+ ["truncate -s 0 <huge-logfile>","Empty a runaway log without restarting the app"],
+ ["","Then: fix log rotation / retention so it does not come back."]
+]);
+
+R("highload","High CPU or load on a host","Linux","Host is slow; load average far above core count.",[
+ ["uptime && nproc","Load vs number of cores"],
+ ["top -b -n1 -o %CPU | head -20","Top CPU consumers"],
+ ["vmstat 1 5","High 'wa' = waiting on disk; high 'si/so' = swapping; high 'r' = CPU starved"],
+ ["iostat -xz 1 3","Disks at ~100% util or high await?"],
+ ["ps -eo pid,stat,cmd | awk '$2 ~ /D/'","Processes stuck in uninterruptible IO"],
+ ["free -h && dmesg -T | grep -i oom","Memory pressure / OOM kills"],
+ ["sudo perf top","Where CPU time goes (if perf installed)"]
+]);
+
+R("unreachable","Service not reachable","Networking","Clients get timeouts or connection refused.",[
+ ["dig +short <host>","DNS resolves to the right IP?"],
+ ["nc -zv <host> <port>","Refused = nothing listening. Timeout = firewall / routing."],
+ ["curl -v https://<host>/","TLS or HTTP-level error?"],
+ ["ssh <user>@<server> 'ss -tulpn | grep <port>'","Is the process listening — on 0.0.0.0 or only 127.0.0.1?"],
+ ["sudo firewall-cmd --list-all || sudo ufw status","Host firewall"],
+ ["mtr -rwc 30 <host>","Where along the path packets die"],
+ ["kubectl get endpoints <svc> -n <ns>","Kubernetes: service has endpoints? Empty = selector/readiness issue"],
+ ["kubectl run tmp --rm -it --image=nicolaka/netshoot -n <ns> -- curl -sv http://<svc>:<port>/","Test from inside the cluster"],
+ ["kubectl get networkpolicy -n <ns>","NetworkPolicy blocking traffic?"]
+]);
+
+R("cert","TLS certificate expiring or invalid","Networking","Browser warnings or cert expiry alerts.",[
+ ["echo | openssl s_client -connect <host>:443 -servername <host> 2>/dev/null | openssl x509 -noout -subject -issuer -enddate -ext subjectAltName","What the server is actually presenting"],
+ ["echo | openssl s_client -connect <host>:443 -servername <host> 2>&1 | grep -E 'Verify return code|depth'","Chain complete? (missing intermediate is common)"],
+ ["kubectl get certificate -A","cert-manager certificates and Ready state"],
+ ["kubectl describe certificate <cert> -n <ns>","Why renewal failed"],
+ ["kubectl get certificaterequest,order,challenge -n <ns>","ACME order/challenge progress"],
+ ["kubectl logs -n cert-manager deploy/cert-manager --tail=100","cert-manager errors"],
+ ["cmctl renew <cert> -n <ns>","Force renewal"]
+]);
+
+R("pgconn","PostgreSQL: too many connections / slow","Data","Apps get 'too many clients' or queries hang.",[
+ ["SELECT count(*) AS used, current_setting('max_connections') AS max FROM pg_stat_activity;","How close to the limit"],
+ ["SELECT usename, client_addr, state, count(*) FROM pg_stat_activity GROUP BY 1,2,3 ORDER BY 4 DESC;","Who holds the connections"],
+ ["SELECT pid, now()-xact_start AS age, left(query,60) FROM pg_stat_activity WHERE state='idle in transaction' ORDER BY age DESC;","Idle-in-transaction sessions holding locks"],
+ ["SELECT pid, pg_blocking_pids(pid), left(query,60) FROM pg_stat_activity WHERE cardinality(pg_blocking_pids(pid))>0;","Lock chains"],
+ ["SELECT pg_terminate_backend(<pid>);","Kill the blocker (confirm with the app owner)"],
+ ["","Long term: put PgBouncer in front, set idle_in_transaction_session_timeout, fix app pool sizes."]
+]);
+
+R("redismem","Redis memory high / evictions","Data","Memory near maxmemory, keys disappearing.",[
+ ["redis-cli -h <host> info memory | grep -E 'used_memory_human|maxmemory_human|mem_fragmentation_ratio'","Usage vs limit"],
+ ["redis-cli -h <host> info stats | grep evicted_keys","Evictions happening?"],
+ ["redis-cli -h <host> --bigkeys","Which keys are huge"],
+ ["redis-cli -h <host> --scan --pattern '*' | head -1000 | xargs -n1 redis-cli -h <host> ttl | sort | uniq -c | sort -rn | head","Sample: how many keys have no TTL (-1)"],
+ ["redis-cli -h <host> config get maxmemory-policy","noeviction means writes will fail when full"],
+ ["","Fix: add TTLs, shrink big keys, raise maxmemory, or scale out. Fragmentation > 1.5 → consider activedefrag."]
+]);
+
+R("tfstate","Terraform: state locked or drifted","IaC & GitOps","'Error acquiring the state lock' or unexpected plan diffs.",[
+ ["","Make sure no pipeline or colleague is running Terraform right now."],
+ ["terraform force-unlock <lock-id>","Release the lock (ID is in the error message)"],
+ ["terraform state pull > state-backup-$(date +%F).json","Back up state before any surgery"],
+ ["terraform plan -refresh-only","See drift without proposing changes"],
+ ["terraform apply -refresh-only","Accept real-world changes into state"],
+ ["terraform import <resource.addr> <id>","Adopt a resource created by hand"],
+ ["terraform state mv <old.addr> <new.addr>","Fix a rename that plans as destroy/create"]
+]);
+
+R("helmstuck","Helm release stuck (pending-upgrade)","Kubernetes","'another operation is in progress'.",[
+ ["helm list -n <ns> -a","Status shows pending-upgrade / pending-install"],
+ ["helm history <release> -n <ns>","Find the last deployed revision"],
+ ["helm rollback <release> <last-good-revision> -n <ns>","Roll back — usually clears the lock"],
+ ["kubectl get secret -n <ns> -l owner=helm,name=<release>","Release secrets (one per revision)"],
+ ["kubectl delete secret sh.helm.release.v1.<release>.v<stuck-revision> -n <ns>","Last resort: delete the stuck revision's secret"],
+ ["","Use --atomic --wait --timeout on upgrades to avoid this."]
+]);
+
+R("kafkalag","Kafka consumer lag growing","Data","Consumers fall behind producers.",[
+ ["kafka-consumer-groups.sh --bootstrap-server <broker>:9092 --describe --group <group>","Lag per partition — all partitions or a few?"],
+ ["kafka-consumer-groups.sh --bootstrap-server <broker>:9092 --describe --group <group> --members","Enough consumers? Idle partitions?"],
+ ["kubectl logs -n <ns> -l app=<consumer> --since=15m | grep -i -E 'rebalanc|error|timeout'","Rebalance storms or processing errors"],
+ ["kafka-topics.sh --bootstrap-server <broker>:9092 --describe --topic <topic>","Partition count caps parallelism"],
+ ["kubectl scale deploy/<consumer> --replicas=<n> -n <ns>","Scale consumers (≤ partitions)"]
+]);
+
+R("gpumissing","GPU not visible in container / pod","MLOps","torch.cuda.is_available() is False.",[
+ ["nvidia-smi","Driver OK on the host?"],
+ ["docker run --rm --gpus all nvidia/cuda:12.4.1-base-ubuntu22.04 nvidia-smi","Container toolkit OK?"],
+ ["kubectl get nodes -o custom-columns=NAME:.metadata.name,GPU:.status.allocatable.nvidia\\.com/gpu","Node advertises GPUs?"],
+ ["kubectl get pods -n gpu-operator","Device plugin / driver pods healthy?"],
+ ["kubectl get pod <pod> -n <ns> -o jsonpath='{.spec.containers[*].resources.limits}'","Pod requests nvidia.com/gpu?"],
+ ["kubectl exec -it <pod> -n <ns> -- python -c \"import torch; print(torch.version.cuda, torch.cuda.is_available())\"","CUDA build of the framework matches the driver?"]
+]);
+
+R("ocpdegraded","OpenShift cluster operator degraded","Kubernetes","oc get co shows Degraded=True.",[
+ ["oc get co | grep -v 'True.*False.*False'","Which operators are unhappy"],
+ ["oc describe co <operator> | sed -n '/Conditions:/,/Extension:/p'","Reason and message"],
+ ["oc get pods -n openshift-<operator> ","Operator pods"],
+ ["oc logs -n openshift-<operator> deploy/<operator>-operator --tail=100","Operator logs"],
+ ["oc get mcp","Stuck machine config rollout?"],
+ ["oc adm inspect co/<operator> --dest-dir=inspect-<operator>","Collect data for a support case"]
+]);
+
+/* Service admin groups: host-level control, admin shells, config/log locations. Inserted as first group of each tool. */
+A("linux","Service control (any service)",[
+ ["sudo systemctl [[status|start|stop|restart|reload|enable|disable]] <service>","Control a systemd service — pick the action"],
+ ["systemctl is-active <service> && systemctl is-enabled <service>","Running now? Starts at boot?"],
+ ["systemctl show <service> -p MainPID,ActiveEnterTimestamp,NRestarts","PID, since when, how many restarts"],
+ ["sudo journalctl -u <service> -n 100 --no-pager","Last 100 log lines of a service"],
+ ["sudo service <service> [[status|start|stop|restart]]","Older SysV-style systems"],
+ ["sudo -u <service-user> -s","Shell as a service account (e.g. postgres, jenkins, nexus)"],
+ ["sudo -iu <user>","Login shell as another user"],
+ ["sudo ss -tlnp | grep -E ':(<port>)\\b'","Which process listens on a port"],
+ ["systemctl list-unit-files --type=service | grep <name>","Find a unit's exact name"]
+]);
+A("linux","Common OS services",[
+ ["sudo systemctl [[status|restart|reload]] [[sshd|ssh]]","SSH server (sshd on RHEL, ssh on Ubuntu)"],
+ ["sudo sshd -t","Test sshd_config before restarting"],
+ ["sudo vi /etc/ssh/sshd_config","SSH server config"],
+ ["sudo systemctl [[status|restart]] [[chronyd|chrony|systemd-timesyncd]]","Time sync service"],
+ ["chronyc tracking && chronyc sources -v","Time sync offset and sources"],
+ ["sudo systemctl [[status|restart]] [[cron|crond]]","Cron (cron on Debian, crond on RHEL)"],
+ ["sudo systemctl [[status|restart]] [[firewalld|ufw]]","Firewall service"],
+ ["sudo systemctl [[status|restart]] [[NetworkManager|systemd-networkd]]","Network service"],
+ ["sudo systemctl [[status|restart]] [[rsyslog|systemd-journald]]","Logging service"],
+ ["sudo hostnamectl set-hostname <hostname>","Change hostname"],
+ ["sudo timedatectl set-timezone Europe/Istanbul","Set timezone"]
+]);
+
+A("postgres","Service admin (Linux host)",[
+ ["sudo systemctl [[status|start|stop|restart|reload]] postgresql","Control PostgreSQL (RHEL: postgresql-<version>)"],
+ ["sudo -u postgres psql","Open psql as the postgres superuser"],
+ ["sudo -u postgres psql -d <db>","psql as postgres on a specific database"],
+ ["sudo -u postgres psql -c 'SHOW config_file;' -c 'SHOW hba_file;' -c 'SHOW data_directory;'","Where postgresql.conf, pg_hba.conf and data live"],
+ ["sudo -u postgres psql -c 'SELECT pg_reload_conf();'","Reload config after editing pg_hba.conf / postgresql.conf"],
+ ["pg_lsclusters","Debian/Ubuntu: clusters, versions, ports, status"],
+ ["sudo pg_ctlcluster <version> main [[status|start|stop|restart|reload]]","Debian/Ubuntu: control one cluster"],
+ ["sudo tail -f /var/log/postgresql/postgresql-<version>-main.log","Debian/Ubuntu server log"],
+ ["sudo ls /var/lib/pgsql/<version>/data/log/","RHEL server logs"],
+ ["sudo /usr/pgsql-<version>/bin/postgresql-<version>-setup initdb","RHEL: initialise a fresh cluster"],
+ ["sudo -u postgres createuser --pwprompt <user>","Create a login role"],
+ ["sudo -u postgres createdb -O <user> <db>","Create a database owned by a user"],
+ ["sudo -u postgres psql -c \"ALTER USER <user> WITH PASSWORD '<password>';\"","Reset a user's password"],
+ ["sudo ss -tlnp | grep 5432","Is it listening, and on which address"],
+ ["docker exec -it <container> psql -U postgres","psql inside a Docker container"],
+ ["kubectl exec -it <pod> -n <ns> -- psql -U postgres","psql inside a Kubernetes pod"]
+]);
+
+A("mysql","Service admin (Linux host)",[
+ ["sudo systemctl [[status|start|stop|restart]] [[mysql|mysqld|mariadb]]","Control MySQL/MariaDB (mysql on Debian, mysqld on RHEL)"],
+ ["sudo mysql","Root shell via unix socket (Debian/MariaDB default)"],
+ ["mysql -u root -p","Root shell with password"],
+ ["sudo mysql_secure_installation","Harden a fresh install"],
+ ["mysql --help | grep -A1 'Default options'","Which config files are read, in order"],
+ ["sudo tail -f /var/log/mysql/error.log","Error log (RHEL: /var/log/mysqld.log)"],
+ ["sudo grep 'temporary password' /var/log/mysqld.log","RHEL: initial root password"],
+ ["CREATE USER '<user>'@'%' IDENTIFIED BY '<password>'; GRANT ALL ON <db>.* TO '<user>'@'%';","Create an app user"],
+ ["sudo ss -tlnp | grep 3306","Listening address"],
+ ["docker exec -it <container> mysql -uroot -p","Shell inside a container"]
+]);
+
+A("mongo","Service admin (Linux host)",[
+ ["sudo systemctl [[status|start|stop|restart]] mongod","Control MongoDB"],
+ ["mongosh","Local shell (no auth)"],
+ ["mongosh -u <user> -p --authenticationDatabase admin","Local shell with auth"],
+ ["sudo vi /etc/mongod.conf","Config (bindIp, port, storage, security)"],
+ ["sudo tail -f /var/log/mongodb/mongod.log","Server log"],
+ ["sudo ss -tlnp | grep 27017","Listening address"],
+ ["docker exec -it <container> mongosh","Shell inside a container"]
+]);
+
+A("redis","Service admin (Linux host)",[
+ ["sudo systemctl [[status|start|stop|restart]] [[redis-server|redis]]","Control Redis (redis-server on Debian, redis on RHEL)"],
+ ["redis-cli","Local shell"],
+ ["sudo vi /etc/redis/redis.conf","Config (RHEL 8: /etc/redis.conf)"],
+ ["redis-cli config get dir && redis-cli config get dbfilename","Where the RDB file is written"],
+ ["redis-cli config set maxmemory 2gb && redis-cli config rewrite","Change a setting live and persist it"],
+ ["sudo tail -f /var/log/redis/redis-server.log","Server log (RHEL: /var/log/redis/redis.log)"],
+ ["sudo ss -tlnp | grep 6379","Listening address"],
+ ["docker exec -it <container> redis-cli","Shell inside a container"],
+ ["kubectl exec -it <pod> -n <ns> -- redis-cli","Shell inside a pod"]
+]);
+
+A("minio","Service admin (Linux host)",[
+ ["sudo systemctl [[status|start|stop|restart]] minio","Control MinIO"],
+ ["sudo vi /etc/default/minio","Environment file (MINIO_VOLUMES, MINIO_OPTS, root credentials)"],
+ ["sudo journalctl -u minio -f","Server log"],
+ ["minio --version && mc --version","Server and client versions"],
+ ["sudo ss -tlnp | grep -E ':(9000|9001)'","API (9000) and console (9001)"],
+ ["mc admin service restart <alias>","Restart all servers in a deployment"],
+ ["docker logs -f <container>","Logs when running in Docker"]
+]);
+
+A("kafka","Service admin (Linux host)",[
+ ["sudo systemctl [[status|start|stop|restart]] kafka","Control the broker (unit name depends on install)"],
+ ["sudo systemctl [[status|start|stop|restart]] zookeeper","ZooKeeper (not needed in KRaft mode)"],
+ ["/opt/kafka/bin/kafka-server-start.sh -daemon /opt/kafka/config/server.properties","Start a broker manually"],
+ ["/opt/kafka/bin/kafka-server-stop.sh","Stop a broker manually"],
+ ["sudo vi /opt/kafka/config/server.properties","Broker config (KRaft: config/kraft/server.properties)"],
+ ["tail -f /opt/kafka/logs/server.log","Broker log"],
+ ["kafka-broker-api-versions.sh --bootstrap-server <broker>:9092 | head -3","Is the broker answering"],
+ ["kafka-metadata-quorum.sh --bootstrap-server <broker>:9092 describe --status","KRaft controller quorum"],
+ ["sudo ss -tlnp | grep 9092","Listening address"]
+]);
+
+A("rabbitmq","Service admin (Linux host)",[
+ ["sudo systemctl [[status|start|stop|restart]] rabbitmq-server","Control RabbitMQ"],
+ ["sudo rabbitmq-plugins enable rabbitmq_management","Enable the web UI on :15672"],
+ ["sudo rabbitmqctl add_user <user> <password>","Create a user"],
+ ["sudo rabbitmqctl set_user_tags <user> administrator","Make the user an admin"],
+ ["sudo rabbitmqctl set_permissions -p / <user> \".*\" \".*\" \".*\"","Full permissions on the default vhost"],
+ ["sudo rabbitmqctl change_password <user> <password>","Reset a password"],
+ ["sudo vi /etc/rabbitmq/rabbitmq.conf","Config"],
+ ["sudo tail -f /var/log/rabbitmq/rabbit@$(hostname -s).log","Node log"],
+ ["sudo ss -tlnp | grep -E ':(5672|15672)'","AMQP and management ports"]
+]);
+
+A("etcd","Service admin (host)",[
+ ["sudo crictl ps | grep etcd","kubeadm: etcd runs as a static pod"],
+ ["sudo cat /etc/kubernetes/manifests/etcd.yaml","kubeadm: etcd flags and cert paths"],
+ ["sudo crictl logs --tail 100 $(sudo crictl ps -q --name etcd)","kubeadm: etcd logs"],
+ ["sudo systemctl [[status|start|stop|restart]] etcd","Standalone etcd as a systemd service"],
+ ["sudo du -sh /var/lib/etcd","Data directory size"]
+]);
+
+A("nginx","Service admin (Linux host)",[
+ ["sudo systemctl [[status|start|stop|restart|reload]] nginx","Control Nginx (prefer reload)"],
+ ["sudo nginx -t && sudo systemctl reload nginx","Test, then reload — the safe way"],
+ ["ls /etc/nginx/conf.d/ /etc/nginx/sites-enabled/ 2>/dev/null","Where site configs live"],
+ ["sudo ln -s /etc/nginx/sites-available/<site> /etc/nginx/sites-enabled/","Debian/Ubuntu: enable a site"],
+ ["sudo certbot --nginx -d <host>","Get and install a Let's Encrypt certificate"],
+ ["sudo certbot renew --dry-run","Test certificate auto-renewal"],
+ ["sudo setsebool -P httpd_can_network_connect 1","RHEL/SELinux: allow Nginx to proxy to upstreams"],
+ ["sudo ss -tlnp | grep -E ':(80|443)'","Listening ports"]
+]);
+
+A("docker","Service admin (Linux host)",[
+ ["sudo systemctl [[status|start|stop|restart]] [[docker|containerd]]","Control the Docker daemon / containerd"],
+ ["sudo usermod -aG docker $USER && newgrp docker","Use docker without sudo (log out/in after)"],
+ ["sudo vi /etc/docker/daemon.json","Daemon config (log size, registry mirrors, data-root)"],
+ ["echo '{\"log-driver\":\"json-file\",\"log-opts\":{\"max-size\":\"50m\",\"max-file\":\"3\"}}' | sudo tee /etc/docker/daemon.json","Cap container log size (restart docker after)"],
+ ["sudo systemctl edit docker","Add proxy env vars via a drop-in"],
+ ["sudo du -sh /var/lib/docker","Docker data size"],
+ ["docker context ls","Contexts (local, remote hosts)"]
+]);
+
+A("k8s","Node admin (host)",[
+ ["sudo systemctl [[status|start|stop|restart]] [[kubelet|containerd|crio]]","Control kubelet / container runtime"],
+ ["sudo journalctl -u kubelet -f","Follow kubelet logs"],
+ ["sudo crictl ps -a","All containers on the node"],
+ ["sudo crictl pods","Pod sandboxes on the node"],
+ ["sudo crictl logs --tail 100 <container-id>","Container logs without the API server"],
+ ["sudo crictl images","Images on the node"],
+ ["sudo crictl rmi --prune","Remove unused images on the node"],
+ ["ls /etc/kubernetes/manifests/","kubeadm: control plane static pods"],
+ ["sudo cat /var/lib/kubelet/config.yaml","Kubelet config (eviction thresholds etc.)"],
+ ["sudo kubeadm certs check-expiration","Control plane certificate expiry"],
+ ["sudo kubeadm certs renew all","Renew control plane certs (restart static pods after)"],
+ ["sudo kubeadm token create --print-join-command","Join command for a new node"],
+ ["sudo cat /etc/containerd/config.toml | grep -A3 SystemdCgroup","containerd cgroup driver"]
+]);
+
+A("jenkins","Service admin (Linux host)",[
+ ["sudo systemctl [[status|start|stop|restart]] jenkins","Control Jenkins"],
+ ["sudo cat /var/lib/jenkins/secrets/initialAdminPassword","Initial admin password"],
+ ["sudo journalctl -u jenkins -f","Jenkins log"],
+ ["sudo systemctl edit jenkins","Change JAVA_OPTS / port via drop-in (Environment=)"],
+ ["sudo -u jenkins -s","Shell as the jenkins user (SSH keys, git config)"],
+ ["sudo du -sh /var/lib/jenkins","JENKINS_HOME size"],
+ ["curl -s -o /dev/null -w '%{http_code}\\n' http://localhost:8080/login","Web UI answering"],
+ ["docker exec -it <container> cat /var/jenkins_home/secrets/initialAdminPassword","Initial password (Docker)"]
+]);
+
+A("gitlab","GitLab server (Omnibus)",[
+ ["sudo gitlab-ctl status","All GitLab components"],
+ ["sudo gitlab-ctl [[restart|stop|start]] [[puma|sidekiq|nginx|postgresql|redis|gitaly]]","Control one component"],
+ ["sudo gitlab-ctl restart","Restart everything"],
+ ["sudo vi /etc/gitlab/gitlab.rb && sudo gitlab-ctl reconfigure","Change config and apply it"],
+ ["sudo gitlab-ctl tail [[puma|sidekiq|nginx|gitaly]]","Follow a component's logs"],
+ ["sudo cat /etc/gitlab/initial_root_password","Initial root password (deleted after 24h)"],
+ ["sudo gitlab-rake gitlab:check SANITIZE=true","Health check"],
+ ["sudo gitlab-rake gitlab:env:info","Versions and environment"],
+ ["sudo gitlab-backup create","Create a backup (also back up /etc/gitlab separately)"],
+ ["sudo gitlab-rails console","Rails console (careful)"],
+ ["sudo gitlab-psql","PostgreSQL shell for GitLab's DB"]
+]);
+
+A("nexus","Service admin (Linux host)",[
+ ["sudo systemctl [[status|start|stop|restart]] nexus","Control Nexus (if installed as a service)"],
+ ["sudo -u nexus /opt/nexus/bin/nexus [[start|stop|restart|status|run]]","Control with the bundled script"],
+ ["sudo vi /opt/nexus/bin/nexus.vmoptions","JVM heap and data directory (-Xmx, -Dkaraf.data)"],
+ ["sudo vi <sonatype-work>/nexus3/etc/nexus.properties","Port and context path"],
+ ["sudo ss -tlnp | grep 8081","Web UI port"],
+ ["docker exec -it <container> cat /nexus-data/admin.password","Initial admin password (Docker)"],
+ ["docker logs -f <container>","Logs in Docker"]
+]);
+
+A("harbor","Service admin (Docker Compose install)",[
+ ["cd /opt/harbor && sudo docker compose ps","Harbor containers"],
+ ["cd /opt/harbor && sudo docker compose [[restart|stop|start]]","Control all components"],
+ ["cd /opt/harbor && sudo docker compose down && sudo ./prepare && sudo docker compose up -d","Apply changes to harbor.yml"],
+ ["sudo tail -f /var/log/harbor/core.log","Core service log"],
+ ["sudo du -sh /data/registry","Registry storage size"]
+]);
+
+A("vault","Service admin (Linux host)",[
+ ["sudo systemctl [[status|start|stop|restart]] vault","Control Vault (a restart seals it)"],
+ ["sudo vi /etc/vault.d/vault.hcl","Server config (storage, listener, api_addr)"],
+ ["sudo journalctl -u vault -f","Server log"],
+ ["vault operator init -key-shares=5 -key-threshold=3","First-time init — store the keys safely"],
+ ["vault operator unseal","Unseal after every restart (repeat for threshold)"],
+ ["sudo ss -tlnp | grep 8200","Listening address"]
+]);
+
+A("prom","Service admin (Linux host)",[
+ ["sudo systemctl [[status|start|stop|restart|reload]] [[prometheus|alertmanager]]","Control Prometheus / Alertmanager"],
+ ["sudo systemctl [[status|restart]] [[node_exporter|prometheus-node-exporter]]","Node exporter (Debian package name differs)"],
+ ["promtool check config /etc/prometheus/prometheus.yml && sudo systemctl reload prometheus","Validate, then reload"],
+ ["sudo journalctl -u prometheus -f","Server log"],
+ ["curl -s localhost:9100/metrics | grep -c ^node_","Node exporter answering"],
+ ["sudo du -sh /var/lib/prometheus","TSDB size"]
+]);
+
+A("loki","Service admin (Linux host)",[
+ ["sudo systemctl [[status|start|stop|restart]] [[grafana-server|loki|promtail|alloy]]","Control Grafana, Loki, Promtail or Alloy"],
+ ["sudo vi /etc/grafana/grafana.ini","Grafana config"],
+ ["sudo tail -f /var/log/grafana/grafana.log","Grafana log"],
+ ["sudo grafana cli admin reset-admin-password <password>","Reset Grafana admin password (older: grafana-cli)"],
+ ["sudo grafana cli plugins install <plugin-id> && sudo systemctl restart grafana-server","Install a plugin"],
+ ["curl -s localhost:3100/ready","Loki ready"],
+ ["sudo journalctl -u loki -f","Loki log"]
+]);
+
+A("elastic","Service admin (Linux host)",[
+ ["sudo systemctl [[status|start|stop|restart]] [[elasticsearch|kibana]]","Control Elasticsearch / Kibana"],
+ ["sudo vi /etc/elasticsearch/elasticsearch.yml","Cluster config"],
+ ["sudo ls /etc/elasticsearch/jvm.options.d/","JVM heap overrides (-Xms/-Xmx)"],
+ ["sudo tail -f /var/log/elasticsearch/<cluster-name>.log","Node log"],
+ ["sudo /usr/share/elasticsearch/bin/elasticsearch-reset-password -u elastic","Reset the elastic password"],
+ ["sudo /usr/share/elasticsearch/bin/elasticsearch-create-enrollment-token -s kibana","Enrollment token for Kibana"],
+ ["sudo ss -tlnp | grep -E ':(9200|9300|5601)'","HTTP, transport, Kibana ports"]
+]);
+
+A("airflow","Service admin",[
+ ["sudo systemctl [[status|start|stop|restart]] [[airflow-scheduler|airflow-webserver|airflow-worker]]","Control Airflow components (unit names depend on setup)"],
+ ["airflow users create --username <user> --role Admin --email <email> --firstname <first> --lastname <last> --password <password>","Create an admin user (Airflow 2 FAB auth)"],
+ ["docker compose exec airflow-scheduler airflow dags list","CLI inside the official Docker Compose setup"],
+ ["docker compose logs -f airflow-scheduler","Scheduler logs (Compose)"]
+]);
+
+A("mlflow","Service admin",[
+ ["sudo systemctl [[status|start|stop|restart]] mlflow","Control a systemd-managed MLflow server"],
+ ["sudo journalctl -u mlflow -f","Server log"],
+ ["ps aux | grep '[m]lflow server'","Running server and its flags"]
+]);
+
+A("llm","Service admin",[
+ ["sudo systemctl [[status|start|stop|restart]] ollama","Control Ollama"],
+ ["sudo systemctl edit ollama","Add Environment=\"OLLAMA_HOST=0.0.0.0\" or OLLAMA_MODELS=<dir>"],
+ ["sudo journalctl -u ollama -f","Ollama log"],
+ ["sudo du -sh /usr/share/ollama/.ollama/models","Model storage size"]
+]);
+
+A("gitlab","Runner service",[
+ ["sudo systemctl [[status|start|stop|restart]] gitlab-runner","Control the runner"],
+ ["sudo vi /etc/gitlab-runner/config.toml","Runner config (concurrent, executors)"],
+ ["sudo gitlab-runner register --url https://<gitlab-host> --token <runner-token>","Register a runner"]
+]);
+
+
+/* ---------- state ---------- */
+const store = {
+  get(k,d){ try{ const v = localStorage.getItem(k); return v==null ? d : JSON.parse(v); }catch(e){ return d; } },
+  set(k,v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+};
+let VARS = store.get("ddc-vars", {});
+let STARS = new Set(store.get("ddc-stars", []));
+let view = "commands", active = store.get("ddc-cat", "all");
+const h = location.hash.slice(1);
+if(h==="runbooks"||h==="starred") view = h;
+else if(CATS.some(c=>c.id===h)) active = h;
+if(active!=="all" && !CATS.some(c=>c.id===active)) active = "all";
+
+const PH = /<([A-Za-z][\w.\-\/:]*)>/g;
+const TOK = /<([A-Za-z][\w.\-\/:]*)>|\[\[([^\]]*?\|[^\]]*?)\]\]/g;
+const ALTSEL = {};
+const esc = s => String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+const ICON = {
+  copy:'<svg viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>',
+  done:'<svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg>',
+  star:'<svg viewBox="0 0 24 24"><path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z" stroke-linejoin="round"/></svg>'
+};
+
+/* normalise command rows */
+CATS.forEach(c=>c.groups.forEach(g=>{
+  g[1] = g[1].map(([raw,desc])=>{ const danger = raw.startsWith("!"); const cmd = danger ? raw.slice(1) : raw; return {cmd,desc,danger,key:c.id+"|"+cmd}; });
+}));
+const SECTIONS = [...new Set(CATS.map(c=>c.sec))];
+const TOTAL = CATS.reduce((n,c)=>n+c.groups.reduce((m,g)=>m+g[1].length,0),0);
+
+/* placeholder frequency */
+const PHCOUNT = {};
+const scanPH = s => { for(const m of s.matchAll(PH)) PHCOUNT[m[1]] = (PHCOUNT[m[1]]||0)+1; };
+CATS.forEach(c=>c.groups.forEach(g=>g[1].forEach(r=>scanPH(r.cmd))));
+RUNBOOKS.forEach(r=>r.steps.forEach(s=>scanPH(s[0])));
+const PHLIST = Object.keys(PHCOUNT).sort((a,b)=>PHCOUNT[b]-PHCOUNT[a]||a.localeCompare(b));
+
+/* ---------- search helpers ---------- */
+let terms = [], termRe = null;
+function setTerms(v){
+  terms = v.toLowerCase().split(/\s+/).filter(Boolean);
+  termRe = terms.length ? new RegExp("(" + terms.map(t=>t.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")).join("|") + ")","ig") : null;
+}
+const matches = hay => { const s = hay.toLowerCase(); return terms.every(t=>s.includes(t)); };
+function hl(raw){
+  if(!termRe) return esc(raw);
+  let out = "", last = 0; raw = String(raw);
+  raw.replace(termRe,(m,_,i)=>{ out += esc(raw.slice(last,i)) + "<mark>" + esc(m) + "</mark>"; last = i + m.length; return m; });
+  return out + esc(raw.slice(last));
+}
+function fmtCmd(cmd,key){
+  let out = "", last = 0, k = 0;
+  cmd.replace(TOK,(m,name,alt,i)=>{
+    out += hl(cmd.slice(last,i));
+    if(name){
+      const v = VARS[name];
+      out += v ? `<span class="ph set" title="&lt;${esc(name)}&gt;">${hl(v)}</span>` : `<span class="ph">${hl(m)}</span>`;
+    } else {
+      const opts = alt.split("|"), sel = (ALTSEL[key]||[])[k] ?? opts[0];
+      out += `<select class="alt" data-key="${esc(key)}" data-k="${k}" aria-label="Choose option">${opts.map(o=>`<option${o===sel?" selected":""}>${esc(o)}</option>`).join("")}</select>`;
+      k++;
+    }
+    last = i + m.length; return m;
+  });
+  return out + hl(cmd.slice(last));
+}
+const fillCmd = (cmd,key) => { let k = 0; const sels = ALTSEL[key]||[]; return cmd.replace(TOK,(m,name,alt)=> name ? (VARS[name] || m) : (sels[k++] ?? alt.split("|")[0])); };
+
+/* ---------- rendering ---------- */
+let ROWS = [];
+function rowHTML(r){
+  const i = ROWS.push(r) - 1, on = STARS.has(r.key);
+  return `<div class="row"><div class="cmdline"><code class="cmd">${fmtCmd(r.cmd,r.key)}</code>`+
+    `<button class="ib star${on?" on":""}" type="button" data-star="${i}" aria-pressed="${on}" aria-label="${on?"Unstar":"Star"} command">${ICON.star}</button>`+
+    `<button class="ib copy" type="button" data-copy="${i}" aria-label="Copy command">${ICON.copy}</button></div>`+
+    `<div class="desc">${r.danger?'<span class="danger">Destructive</span>':""}${hl(r.desc)}</div></div>`;
+}
+function filteredCats(onlyStarred){
+  return CATS.map(c=>{
+    const groups = c.groups.map(([g,rows])=>[g, rows.filter(r=>(!onlyStarred||STARS.has(r.key)) && (!terms.length || matches(r.cmd+" "+fillCmd(r.cmd,r.key)+" "+r.desc+" "+g+" "+c.name+" "+c.tag+" "+c.sec)))]).filter(([,rows])=>rows.length);
+    return {c, groups, n: groups.reduce((m,[,r])=>m+r.length,0)};
+  });
+}
+function renderSide(fc){
+  const side = document.getElementById("side");
+  const total = fc.reduce((n,x)=>n+x.n,0);
+  let html = `<button type="button" data-cat="all" aria-pressed="${active==="all"}">All tools<span>${total}</span></button>`;
+  for(const sec of SECTIONS){
+    html += `<h4>${esc(sec)}</h4>`;
+    fc.filter(x=>x.c.sec===sec).forEach(x=>{
+      html += `<button type="button" data-cat="${x.c.id}" aria-pressed="${active===x.c.id}" class="${x.n?"":"zero"}">${esc(x.c.name)}<span>${x.n}</span></button>`;
+    });
+  }
+  side.innerHTML = html;
+  side.hidden = view!=="commands";
+  document.querySelector(".layout").style.gridTemplateColumns = view==="commands" ? "" : "1fr";
+}
+function renderCommands(onlyStarred){
+  const fc = filteredCats(onlyStarred);
+  if(!onlyStarred) renderSide(fc); else { document.getElementById("side").hidden = true; document.querySelector(".layout").style.gridTemplateColumns = "1fr"; }
+  let html = "", shown = 0;
+  for(const x of fc){
+    if(!onlyStarred && active!=="all" && x.c.id!==active) continue;
+    if(!x.n) continue;
+    shown += x.n;
+    html += `<section class="cat" id="cat-${x.c.id}"><div class="cat-head"><h2>${esc(x.c.name)}</h2><span class="tag">${esc(x.c.tag)}</span><p>${esc(x.c.blurb)}</p></div>`;
+    for(const [g,rows] of x.groups) html += `<div class="group">${esc(g)}</div><div class="grid">${rows.map(rowHTML).join("")}</div>`;
+    html += `</section>`;
+  }
+  if(!shown){
+    html = onlyStarred && !STARS.size
+      ? `<p class="empty">Nothing starred yet. Select the star next to any command to keep it here.</p>`
+      : `<p class="empty">No commands match that search. Try fewer words${active!=="all"&&!onlyStarred?", or choose “All tools”":""}.</p>`;
+  }
+  return html;
+}
+function renderRunbooks(){
+  const list = RUNBOOKS.filter(r=>!terms.length || matches(r.title+" "+r.area+" "+r.symptom+" "+r.steps.map(s=>s.join(" ")).join(" ")));
+  document.getElementById("side").hidden = true;
+  document.querySelector(".layout").style.gridTemplateColumns = "1fr";
+  if(!list.length) return `<p class="empty">No runbooks match that search.</p>`;
+  return `<p class="hint">Step-by-step checks for common incidents. Work top to bottom — earlier steps narrow down the cause.</p><div class="rb-grid">` + list.map(r=>
+    `<article class="rb" id="rb-${r.id}"><div class="meta"><span class="tag">${esc(r.area)}</span></div><h3>${hl(r.title)}</h3><p class="symptom">${hl(r.symptom)}</p><ol>`+
+    r.steps.map(([cmd,note])=>{
+      if(!cmd) return `<li class="note"><div class="step"><div class="desc">${hl(note)}</div></div></li>`;
+      const row = {cmd,desc:note,danger:false,key:"rb:"+r.id+"|"+cmd};
+      const i = ROWS.push(row)-1;
+      return `<li><div class="step"><div class="cmdline"><code class="cmd">${fmtCmd(cmd,row.key)}</code><button class="ib copy" type="button" data-copy="${i}" aria-label="Copy command">${ICON.copy}</button></div><div class="desc">${hl(note)}</div></div></li>`;
+    }).join("") + `</ol></article>`).join("") + `</div>`;
+}
+function render(){
+  ROWS = [];
+  const out = document.getElementById("out");
+  out.innerHTML = view==="runbooks" ? renderRunbooks() : renderCommands(view==="starred");
+  document.querySelectorAll(".tab").forEach(t=>t.setAttribute("aria-selected", t.dataset.view===view));
+  document.getElementById("n-commands").textContent = TOTAL;
+  document.getElementById("n-runbooks").textContent = RUNBOOKS.length;
+  document.getElementById("n-starred").textContent = STARS.size;
+}
+function renderStats(){
+  document.getElementById("stats").innerHTML =
+    `<div><b>${TOTAL}</b>commands</div><div><b>${CATS.length}</b>tools</div><div><b>${RUNBOOKS.length}</b>runbooks</div>`;
+}
+
+/* ---------- variables panel ---------- */
+function renderVars(){
+  const f = document.getElementById("vfilter").value.trim().toLowerCase();
+  const set = PHLIST.filter(p=>VARS[p]);
+  let list = f ? PHLIST.filter(p=>p.toLowerCase().includes(f)) : [...new Set([...set, ...PHLIST.slice(0,30)])];
+  document.getElementById("vgrid").innerHTML = list.map(p=>
+    `<label>&lt;${esc(p)}&gt;<input data-var="${esc(p)}" id="var-${esc(p.replace(/[^\w-]/g,"_"))}" class="${VARS[p]?"has":""}" value="${esc(VARS[p]||"")}" placeholder="${esc(p)}" autocomplete="off" spellcheck="false"><small>used ${PHCOUNT[p]}×</small></label>`
+  ).join("") || `<p class="hint">No placeholder matches “${esc(f)}”.</p>`;
+  updateVCount();
+}
+function updateVCount(){
+  const n = Object.values(VARS).filter(Boolean).length, el = document.getElementById("vcount");
+  el.hidden = !n; el.textContent = n + " set";
+}
+
+/* ---------- events ---------- */
+const q = document.getElementById("q");
+let tmr;
+q.addEventListener("input",()=>{ clearTimeout(tmr); tmr = setTimeout(()=>{ setTerms(q.value); render(); },90); });
+document.getElementById("tabs").addEventListener("click",e=>{
+  const t = e.target.closest(".tab"); if(!t) return;
+  view = t.dataset.view; render(); window.scrollTo({top:0});
+});
+document.getElementById("side").addEventListener("click",e=>{
+  const b = e.target.closest("button[data-cat]"); if(!b) return;
+  active = b.dataset.cat; store.set("ddc-cat",active); render();
+  document.querySelector(".bar").scrollIntoView({block:"start"});
+});
+document.getElementById("out").addEventListener("click",e=>{
+  const c = e.target.closest("[data-copy]");
+  if(c){
+    const rr = ROWS[+c.dataset.copy]; const txt = fillCmd(rr.cmd, rr.key);
+    const ok = ()=>{ c.classList.add("done"); c.innerHTML = ICON.done; c.setAttribute("aria-label","Copied"); setTimeout(()=>{ c.classList.remove("done"); c.innerHTML = ICON.copy; c.setAttribute("aria-label","Copy command"); },1400); };
+    const fallback = ()=>{ const code = c.parentElement.querySelector("code"); const r = document.createRange(); r.selectNodeContents(code); const s = getSelection(); s.removeAllRanges(); s.addRange(r); };
+    try{ navigator.clipboard.writeText(txt).then(ok,fallback); }catch(err){ fallback(); }
+    return;
+  }
+  const s = e.target.closest("[data-star]");
+  if(s){
+    const key = ROWS[+s.dataset.star].key;
+    STARS.has(key) ? STARS.delete(key) : STARS.add(key);
+    store.set("ddc-stars",[...STARS]);
+    if(view==="starred") render();
+    else { const on = STARS.has(key); s.classList.toggle("on",on); s.setAttribute("aria-pressed",on); s.setAttribute("aria-label",(on?"Unstar":"Star")+" command"); document.getElementById("n-starred").textContent = STARS.size; }
+  }
+});
+document.getElementById("out").addEventListener("change",e=>{
+  const s = e.target.closest("select.alt"); if(!s) return;
+  (ALTSEL[s.dataset.key] ||= [])[+s.dataset.k] = s.value;
+});
+const vbtn = document.getElementById("vbtn"), vp = document.getElementById("vp");
+vbtn.addEventListener("click",()=>{ const open = vp.hidden; vp.hidden = !open; vbtn.setAttribute("aria-expanded",open); if(open) renderVars(); });
+document.getElementById("vfilter").addEventListener("input",renderVars);
+let vt;
+document.getElementById("vgrid").addEventListener("input",e=>{
+  const i = e.target.closest("input[data-var]"); if(!i) return;
+  const v = i.value.trim();
+  if(v) VARS[i.dataset.var] = v; else delete VARS[i.dataset.var];
+  i.classList.toggle("has",!!v);
+  store.set("ddc-vars",VARS); updateVCount();
+  clearTimeout(vt); vt = setTimeout(render,150);
+});
+document.getElementById("vclear").addEventListener("click",()=>{ VARS = {}; store.set("ddc-vars",VARS); renderVars(); render(); });
+document.addEventListener("keydown",e=>{
+  const typing = /INPUT|TEXTAREA/.test(document.activeElement.tagName);
+  if(e.key==="/" && !typing){ e.preventDefault(); q.focus(); q.select(); }
+  if(e.key==="Escape" && document.activeElement===q){ q.value=""; setTerms(""); render(); }
+});
+
+renderStats(); updateVCount(); render();
+</script>
+
+</html>
